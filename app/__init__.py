@@ -1,8 +1,11 @@
+import os
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import re
+from dotenv import load_dotenv
+load_dotenv()
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -11,7 +14,7 @@ login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'your_secret_key_here'
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///StockStudy.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
 
@@ -82,6 +85,15 @@ def create_app():
             if user:
                 flash("Email is already registered.", 'danger')
                 return redirect(url_for('register'))
+            
+            new_user = User(name=name, email=email)
+            new_user.set_password(password)
+            
+            db.session.add(new_user)
+            db.session.commit()
+
+            flash("Registration successful! Log in below", "success")
+            return redirect(url_for('login'))
             
         return render_template("register.html")
     
