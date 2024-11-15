@@ -5,7 +5,43 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h1 class="text-center">Login</h1>
+<div class="container d-flex justify-content-center mt-5">
+    <div class="card shadow-sm p-4">
+        <div class="card-body">
+            <h3 class="card-title text-center mb-3">Create Your Account</h3>
+            <h6 class="card-text text-muted text-center mb-4">Register with Google or Stockton Email</h6>
+            <button class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center border" type="button"><img src="https://img.icons8.com/color/16/000000/google-logo.png" class="me-2" alt="Google Logo">Register with Google</button>
+
+                <div class="d-flex align-items-center mb-3">
+                    <hr class="flex-grow-1">
+                    <span class="px-2 text-muted">or</span>
+                    <hr class="flex-grow-1">
+                </div>
+            
+            <form method="POST" action="/login">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="email" class="form-control" id="email" placeholder="Enter Full Name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Stockton Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="username@go.stockton.edu" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+                </div>
+                <div class="mb-3">
+                    <label for="confirm_password" class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Password (again)" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Register</button>
+            </form>
+
+            <p class="text-center mt-4">
+                Already have an account? <a href="/login" class="text-primary link-modern">Log in here</a>
+            </p>
+        </div>
     </div>
+</div>
 {% endblock %}

@@ -20,12 +20,13 @@ def create_app():
 
     login_manager.login_view = 'login'
 
+    from app.models.user import User
+
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
 
     with app.app_context():
-        from .models.user import User
         db.create_all()
 
     @app.route('/')
