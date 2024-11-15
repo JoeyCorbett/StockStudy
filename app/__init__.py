@@ -18,7 +18,7 @@ def create_app():
     bcrypt.init_app(app)
     login_manager.init_app(app)
 
-    login_manager.login_viwe = 'login'
+    login_manager.login_view = 'login'
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -29,13 +29,14 @@ def create_app():
         db.create_all()
 
     @app.route('/')
+    @login_required
     def index():
         return render_template('index.html')
     
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         if current_user.is_authenticated:
-            return redirect(url_for('home'))
+            return redirect(url_for('index'))
         
         if request.method == "POST":
             print("Post")
@@ -45,17 +46,12 @@ def create_app():
     @app.route('/register', methods=['GET', 'POST'])
     def register():
         if current_user.is_authenticated:
-            return redirect(url_for('home'))
+            return redirect(url_for('index'))
         
         if request.method == "POST":
             print("Post")
             
         return render_template("register.html")
-
-    @app.route('/home')
-    @login_required
-    def home():
-        return render_template("home.html")
     
     @app.route('/logout')
     def logout():

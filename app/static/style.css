@@ -1,0 +1,7 @@
+.link-modern {
+    text-decoration: none;
+}
+
+.link-modern:hover {
+    text-decoration: underline;
+}
