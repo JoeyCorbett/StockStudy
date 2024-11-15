@@ -1,7 +1,8 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+import re
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -50,7 +51,37 @@ def create_app():
             return redirect(url_for('index'))
         
         if request.method == "POST":
-            print("Post")
+            name = request.form.get('name')
+            email = request.form.get('email')
+            password = request.form.get('password')
+            confirm_password = request.form.get('confirm_password')
+
+            if not name or not email or not password or not confirm_password:
+                flash("All fields are required.", "danger")
+                return redirect(url_for('register'))
+        
+            if password != confirm_password:
+                flash("Passwords do not match.", "danger")
+                return redirect(url_for('register'))
+            
+            name_regex = r"^[A-Za-z]+ [A-Za-z]+$" 
+            if not re.match(name_regex, name):
+                flash("Please enter your full name (first and last name).", "danger")
+                return redirect(url_for('register'))
+            
+            email_regex = r"^[a-zA-Z0-9._%+-]+@go\.stockton\.edu$"
+            if not re.match(email_regex, email):
+                flash("Please use a valid Stockton Email address.", "danger")
+                return redirect(url_for('register'))
+            
+            password_regex = r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
+            if not re.match(password_regex, password):
+                flash("Password must be at least 8 characters long and include one letter, one number, and one special character.", "danger")
+            
+            user = User.query.filter_by(email=email).first()
+            if user:
+                flash("Email is already registered.", 'danger')
+                return redirect(url_for('register'))
             
         return render_template("register.html")
     

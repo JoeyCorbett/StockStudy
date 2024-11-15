@@ -5,43 +5,59 @@
 {% endblock %}
 
 {% block content %}
-<div class="container d-flex justify-content-center mt-5">
-    <div class="card shadow-sm p-4">
-        <div class="card-body">
-            <h3 class="card-title text-center mb-3">Create Your Account</h3>
-            <h6 class="card-text text-muted text-center mb-4">Register with Google or Stockton Email</h6>
-            <button class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center border" type="button"><img src="https://img.icons8.com/color/16/000000/google-logo.png" class="me-2" alt="Google Logo">Register with Google</button>
+    <div class="container d-flex justify-content-center mt-5">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm p-4">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-3">Create Your Account</h3>
+                    <h6 class="card-text text-muted text-center mb-4">Register with Google or Stockton Email</h6>
 
-                <div class="d-flex align-items-center mb-3">
-                    <hr class="flex-grow-1">
-                    <span class="px-2 text-muted">or</span>
-                    <hr class="flex-grow-1">
-                </div>
-            
-            <form method="POST" action="/login">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Full Name</label>
-                    <input type="email" class="form-control" id="email" placeholder="Enter Full Name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Stockton Email</label>
-                    <input type="email" class="form-control" id="email" placeholder="username@go.stockton.edu" required>
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
-                </div>
-                <div class="mb-3">
-                    <label for="confirm_password" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="Password (again)" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Register</button>
-            </form>
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="container mb-3">
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
 
-            <p class="text-center mt-4">
-                Already have an account? <a href="/login" class="text-primary link-modern">Log in here</a>
-            </p>
+                    <button class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center border" type="button"><img src="https://img.icons8.com/color/16/000000/google-logo.png" class="me-2" alt="Google Logo">Register with Google</button>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <hr class="flex-grow-1">
+                        <span class="px-2 text-muted">or</span>
+                        <hr class="flex-grow-1">
+                    </div>
+                    
+                    <form method="POST" action="/register">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" name="name" class="form-control" id="name" placeholder="Enter Full Name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Stockton Email</label>
+                            <input type="email" name="email" class="form-control" id="email" placeholder="username@go.stockton.edu" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control" id="password" placeholder="Enter your password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                            <input type="password" name="confirm_password" class="form-control" id="password" placeholder="Password (again)" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Register</button>
+                    </form>
+
+                    <p class="text-center mt-4">
+                        Already have an account? <a href="/login" class="text-primary link-modern">Log in here</a>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}
