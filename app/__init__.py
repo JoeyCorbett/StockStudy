@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-import re
+from app.utils import is_valid_email, is_valid_name, is_valid_password
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -42,9 +42,37 @@ def create_app():
     def login():
         if current_user.is_authenticated:
             return redirect(url_for('index'))
-        
+
         if request.method == "POST":
-            print("Post")
+            email = request.form.get("email")
+            password = request.form.get("password")
+
+            # Check if fields are provided
+            if not email or not password:
+                flash("All fields are required", "danger")
+                return redirect(url_for('login'))
+            
+            # Validate email format
+            if not is_valid_email(email):
+                flash("Please use a valid Stockton Email address.", "danger")
+                return redirect(url_for('login'))
+
+            # Get user info from db and make instance of Users
+            user = User.query.filter_by(email=email).first()
+
+            # Check if user exists / if password is correct
+            if not user or not user.check_password(password):
+                flash("Invalid email or password", 'danger')
+                return redirect(url_for('login'))
+            
+
+            # TODO: check if user is verified before logging in
+
+            # TODO: Account locking
+
+            login_user(user)
+            flash(f"Welcome back, {user.name}!", "success")
+            return redirect(url_for('index'))
 
         return render_template("login.html")
     
@@ -62,30 +90,29 @@ def create_app():
             if not name or not email or not password or not confirm_password:
                 flash("All fields are required.", "danger")
                 return redirect(url_for('register'))
-        
-            if password != confirm_password:
-                flash("Passwords do not match.", "danger")
-                return redirect(url_for('register'))
             
-            name_regex = r"^[A-Za-z]+ [A-Za-z]+$" 
-            if not re.match(name_regex, name):
+            if not is_valid_name(name):
                 flash("Please enter your full name (first and last name).", "danger")
                 return redirect(url_for('register'))
             
-            email_regex = r"^[a-zA-Z0-9._%+-]+@go\.stockton\.edu$"
-            if not re.match(email_regex, email):
+            if not is_valid_email(email):
                 flash("Please use a valid Stockton Email address.", "danger")
                 return redirect(url_for('register'))
             
-            password_regex = r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
-            if not re.match(password_regex, password):
-                flash("Password must be at least 8 characters long and include one letter, one number, and one special character.", "danger")
+            if password != confirm_password:
+                flash("Passwords do not match. Please re-enter your password", "danger")
+                return redirect(url_for('register'))
             
-            user = User.query.filter_by(email=email).first()
-            if user:
+            email_exists = User.query.filter_by(email=email).first()
+            if email_exists:
                 flash("Email is already registered.", 'danger')
                 return redirect(url_for('register'))
             
+            if not is_valid_password(password):
+                flash("Password must be at least 8 characters long and include one letter, one number, and one special character.", "danger")
+                return redirect(url_for('register'))
+            
+
             new_user = User(name=name, email=email)
             new_user.set_password(password)
             
@@ -98,6 +125,7 @@ def create_app():
         return render_template("register.html")
     
     @app.route('/logout')
+    @login_required
     def logout():
         logout_user()
         return redirect(url_for('login'))
