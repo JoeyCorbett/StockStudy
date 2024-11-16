@@ -6,7 +6,7 @@
 
 {% block content %}
     <div class="container d-flex justify-content-center mt-5">
-        <div class="col-12 col-md-8 col-lg-6">
+        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
             <div class="card shadow-sm p-4">
                 <div class="card-body">
                     <h3 class="card-title text-center mb-3">Log In to Your Account</h3>
@@ -27,7 +27,7 @@
                         {% endif %}
                     {% endwith %}
 
-                    <button class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center border" type="button"><img src="https://img.icons8.com/color/16/000000/google-logo.png" class="me-2" alt="Google Logo">Continue with Google</button>
+                    <a href="/login/google" class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center border" type="button"><img src="https://img.icons8.com/color/16/000000/google-logo.png" class="me-2" alt="Google Logo">Continue with Google</a>
 
                     <div class="d-flex align-items-center mb-3">
                         <hr class="flex-grow-1">

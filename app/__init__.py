@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, redirect, url_for, request, flash
+from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -21,6 +22,21 @@ def create_app():
     db.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
+    oauth = OAuth(app)
+
+    #Google OAuth configuration
+    google = oauth.register(
+        name='google',
+        client_id=os.getenv('GOOGLE_CLIENT_ID'),
+        client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
+        access_token_url='https://oauth2.googleapis.com/token',
+        access_token_params=None,
+        authorize_url='https://accounts.google.com/o/oauth2/auth',
+        authorize_params=None,
+        api_base_url='https://www.googleapis.com/oauth2/v1/',
+        client_kwargs={'scope': 'openid email profile'},
+        jwks_uri='https://www.googleapis.com/oauth2/v3/certs',
+    )
 
     login_manager.login_view = 'login'
 
@@ -60,13 +76,22 @@ def create_app():
             # Get user info from db and make instance of Users
             user = User.query.filter_by(email=email).first()
 
-            # Check if user exists / if password is correct
-            if not user or not user.check_password(password):
+            # Check if user exists in db
+            if not user:
                 flash("Invalid email or password", 'danger')
                 return redirect(url_for('login'))
             
+            # Detect Google SSO accounts
+            if user.is_google_user:
+                flash("This account is linked to Google. Please log in with Google.", "danger")
+                return redirect(url_for('login'))
+            
+            if not user.check_password(password):
+                 flash("Invalid email or password", 'danger')
+                 return redirect(url_for('login'))
 
             # TODO: check if user is verified before logging in
+            
 
             # TODO: Account locking
 
@@ -75,6 +100,61 @@ def create_app():
             return redirect(url_for('index'))
 
         return render_template("login.html")
+    
+    @app.route('/login/google')
+    def login_google():
+        redirect_uri = url_for('authorize', _external=True)
+        return google.authorize_redirect(redirect_uri)
+    
+    @app.route('/login/callback')
+    def authorize():
+        token = google.authorize_access_token()
+        user_info = google.get('userinfo').json()
+
+        if not isinstance(user_info, dict):
+            flash("Failed to fetch user information from Google. Please try again.", "danger")
+            return redirect(url_for('login'))
+
+        # Grab user details
+        email = user_info['email']
+        name = user_info['name']
+        google_id = user_info['id']
+        domain = user_info.get('hd')
+
+
+        # TODO Redirect user back to original page
+        # Only allow Stockton emails
+        if not domain or domain != "go.stockton.edu":
+            flash("Only Stockton Google Accounts are allowed.", "danger")
+            return redirect(url_for('login'))
+
+        # Check if user already exists
+        user = User.query.filter_by(email=email).first()
+
+        if user:
+            if user.is_google_user:
+                # Log in Google user
+                login_user(user)
+                flash(f"Welcome, {user.name}!", "success")
+                return redirect(url_for('index'))
+            else:
+                # Existing Manual Account
+                flash("This email is registered manually. Please log in using your Stockton email and password.", "danger")
+                return redirect(url_for('login'))
+        else:
+            new_user = User(
+                name=name,
+                email=email,
+                google_id=google_id,
+                is_google_user=True,
+                is_verified=True,
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
+            flash(f"Welcome, {new_user.name}!", "success")
+            return redirect(url_for('index'))
+        
     
     @app.route('/register', methods=['GET', 'POST'])
     def register():
@@ -128,6 +208,7 @@ def create_app():
     @login_required
     def logout():
         logout_user()
+        flash("You have been logged out.", "success")
         return redirect(url_for('login'))
 
 
