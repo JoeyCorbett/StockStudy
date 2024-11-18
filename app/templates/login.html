@@ -10,24 +10,22 @@
             <div class="card shadow-sm p-4">
                 <div class="card-body">
                     <h3 class="card-title text-center mb-3">Log In to Your Account</h3>
-                    <h6 class="card-text text-muted text-center mb-4">Sign in with your Stockton account below</h6>
+                    <h6 class="card-text text-muted text-center mb-4">	Sign in with your Stockton Google account or email below</h6>
 
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
                             <div class="container mb-3">
                                 {% for category, message in messages %}
-                                    {% if category == "danger" or category == "success" %}
-                                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                                            {{ message }}
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                        </div>
-                                    {% endif %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
                                 {% endfor %}
                             </div>
                         {% endif %}
                     {% endwith %}
 
-                    <a href="/login/google" class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center border" type="button"><img src="https://img.icons8.com/color/16/000000/google-logo.png" class="me-2" alt="Google Logo">Continue with Google</a>
+                    <a href="/login/google" class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center border" type="button"><img src="https://img.icons8.com/color/16/000000/google-logo.png" class="me-2" alt="Google Logo">Sign in with Google</a>
 
                     <div class="d-flex align-items-center mb-3">
                         <hr class="flex-grow-1">
@@ -38,11 +36,11 @@
                     <form method="POST" action="/login">
                         <div class="mb-3">
                             <label for="email" class="form-label">Stockton Email</label>
-                            <input type="email" name="email" class="form-control" id="email" placeholder="username@go.stockton.edu" required>
+                            <input type="email" name="email" class="form-control" id="email" placeholder="username@go.stockton.edu" autocomplete="username" required>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" name="password" class="form-control" id="password" placeholder="Enter your password" required>
+                            <input type="password" name="password" class="form-control" id="password" placeholder="Enter your password" required autocomplete="new-password">
                         </div>
                         <div class="d-flex justify-content-between mb-3">
                                 <a href="#" class="text-primary link-modern">Forgot password?</a>

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Verify - StockStudy
+{% endblock %}
+
+{% block content %}
+    <div class="container d-flex justify-content-center align-items-center mt-5">
+        <!-- Full height container for vertical centering -->
+        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-5 text-center">
+                    <h3 class="card-title mb-4">Verify Your Email</h3>
+                    <p class="card-text text-muted mb-4">
+                        We’ve sent a verification email to <strong>{{ email }}</strong>. Please check your inbox and follow the link to activate your account.
+                    </p>
+                    
+                    <form action="{{ url_for('resend_verification')}}" method="POST" class="d-grid">
+                        <button class="btn btn-primary" type="submit">Resend Verification Email</button>
+                    </form>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="mt-4">
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

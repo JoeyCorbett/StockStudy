@@ -1,10 +1,12 @@
 import os
-from flask import Flask, render_template, redirect, url_for, request, flash
+from flask import Flask, render_template, redirect, url_for, request, flash, session
 from authlib.integrations.flask_client import OAuth
+from authlib.integrations.base_client.errors import OAuthError
+from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from app.utils import is_valid_email, is_valid_name, is_valid_password
+from app.utils import is_valid_email, is_valid_name, is_valid_password, generate_verification_token, confirm_verification_token, send_verification_email
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -12,6 +14,7 @@ load_dotenv()
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 login_manager = LoginManager()
+mail = Mail()
 
 def create_app():
     app = Flask(__name__)
@@ -38,7 +41,16 @@ def create_app():
         jwks_uri='https://www.googleapis.com/oauth2/v3/certs',
     )
 
+     # Mail configuration
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+    mail.init_app(app)
+
     login_manager.login_view = 'login'
+    login_manager.login_message = None
 
     from app.models.user import User
 
@@ -53,6 +65,7 @@ def create_app():
     @login_required
     def index():
         return render_template('index.html')
+    
     
     @app.route('/login', methods=['GET', 'POST'])
     def login():
@@ -83,17 +96,22 @@ def create_app():
             
             # Detect Google SSO accounts
             if user.is_google_user:
-                flash("This account is linked to Google. Please log in with Google.", "danger")
+                flash("Invalid email or password", 'danger')
                 return redirect(url_for('login'))
             
             if not user.check_password(password):
                  flash("Invalid email or password", 'danger')
                  return redirect(url_for('login'))
-
-            # TODO: check if user is verified before logging in
             
+            if not user.is_verified:
+                session["email"] = user.email
+                # TODO Genreate non-verified users back to verification page 
+                token = generate_verification_token(user.email)
+                verification_url = url_for('verify_email', token=token, _external=True)
+                send_verification_email(mail, email, verification_url)
 
-            # TODO: Account locking
+                return render_template("verify.html", email=email)
+
 
             login_user(user)
             flash(f"Welcome back, {user.name}!", "success")
@@ -108,52 +126,57 @@ def create_app():
     
     @app.route('/login/callback')
     def authorize():
-        token = google.authorize_access_token()
-        user_info = google.get('userinfo').json()
+        try:
+            token = google.authorize_access_token()
+            user_info = google.get('userinfo').json()
 
-        if not isinstance(user_info, dict):
-            flash("Failed to fetch user information from Google. Please try again.", "danger")
-            return redirect(url_for('login'))
-
-        # Grab user details
-        email = user_info['email']
-        name = user_info['name']
-        google_id = user_info['id']
-        domain = user_info.get('hd')
-
-
-        # TODO Redirect user back to original page
-        # Only allow Stockton emails
-        if not domain or domain != "go.stockton.edu":
-            flash("Only Stockton Google Accounts are allowed.", "danger")
-            return redirect(url_for('login'))
-
-        # Check if user already exists
-        user = User.query.filter_by(email=email).first()
-
-        if user:
-            if user.is_google_user:
-                # Log in Google user
-                login_user(user)
-                flash(f"Welcome, {user.name}!", "success")
-                return redirect(url_for('index'))
-            else:
-                # Existing Manual Account
-                flash("This email is registered manually. Please log in using your Stockton email and password.", "danger")
+            if not isinstance(user_info, dict):
+                flash("Failed to fetch user information from Google. Please try again.", "danger")
                 return redirect(url_for('login'))
-        else:
-            new_user = User(
-                name=name,
-                email=email,
-                google_id=google_id,
-                is_google_user=True,
-                is_verified=True,
-            )
-            db.session.add(new_user)
-            db.session.commit()
-            login_user(new_user)
-            flash(f"Welcome, {new_user.name}!", "success")
-            return redirect(url_for('index'))
+
+            # Grab user details
+            email = user_info['email']
+            name = user_info['name']
+            google_id = user_info['id']
+            domain = user_info.get('hd')
+
+
+
+            # TODO Redirect user back to original page
+            # Only allow Stockton emails
+            if not domain or domain != "go.stockton.edu":
+                flash("Only Stockton Google Accounts are allowed.", "danger")
+                return redirect(url_for('login'))
+
+            # Check if user already exists
+            user = User.query.filter_by(email=email).first()
+
+            if user:
+                if user.is_google_user:
+                    # Log in Google user
+                    login_user(user)
+                    flash(f"Welcome, {user.name}!", "success")
+                    return redirect(url_for('index'))
+                else:
+                    # Existing Manual Account
+                    flash("This email is registered manually. Please log in using your Stockton email and password.", "danger")
+                    return redirect(url_for('login'))
+            else:
+                new_user = User(
+                    name=name,
+                    email=email,
+                    google_id=google_id,
+                    is_google_user=True,
+                    is_verified=True,
+                )
+                db.session.add(new_user)
+                db.session.commit()
+                login_user(new_user)
+                flash(f"Welcome, {new_user.name}!", "success")
+                return redirect(url_for('index'))
+        except OAuthError:
+            flash("Authorization failed or was denied. Please try again.", "danger")
+            return redirect(url_for('login'))
         
     
     @app.route('/register', methods=['GET', 'POST'])
@@ -199,11 +222,72 @@ def create_app():
             db.session.add(new_user)
             db.session.commit()
 
-            flash("Registration successful! Log in below", "success")
-            return redirect(url_for('login'))
+            token = generate_verification_token(email)
+
+            # Creates verification link
+            verification_url = url_for('verify_email', token=token, _external=True)
+            send_verification_email(mail, email, verification_url)
+
+            # Save email to session
+            session["email"] = email
+
+            return render_template("verify.html", email=email)
             
         return render_template("register.html")
     
+
+    @app.route("/verify-email/<token>")
+    def verify_email(token):
+        email = confirm_verification_token(token)
+
+        # Confirm token
+        if not email:
+            flash("The verification link is invalid or has expired", "danger")
+            return redirect(url_for('login'))
+        
+        # Find user in database
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            flash("User not found.", "danger")
+            return redirect(url_for('register'))
+        
+        if user.is_verified:
+            flash("Your email is already verified", "info")
+            return redirect(url_for('login'))
+        
+        user.is_verified = True
+        db.session.commit()
+
+        # Clear session
+        session.pop('email', None)
+
+        flash("Your email has been verified! You can now log in", "success")
+        return redirect(url_for('login'))
+
+    @app.route("/resend-verification", methods=['POST'])
+    def resend_verification():
+
+        
+        email = session.get('email')
+
+        if not email:
+            flash("Session expired or no email found. Please register again.", "danger")
+            return redirect(url_for('register'))
+        
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            flash("Not account found with this email. Please register first.", "danger")
+            return redirect(url_for('register'))
+        
+        token = generate_verification_token(email)
+
+        verification_url = url_for('verify_email', token=token, _external=True)
+        send_verification_email(mail, email, verification_url)
+
+        flash("A new verification link has been sent to your email.", "success")
+        return render_template("verify.html", email=email)
+        
+
     @app.route('/logout')
     @login_required
     def logout():
