@@ -3,6 +3,8 @@ from flask import Flask, render_template, redirect, url_for, request, flash, ses
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.base_client.errors import OAuthError
 from flask_mail import Mail
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -49,6 +51,28 @@ def create_app():
     app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
     mail.init_app(app)
 
+    # Initialize Flask-Limiter
+    limiter = Limiter(
+        get_remote_address,
+        app=app,
+        default_limits=["200 per day", "50 per hour"],
+        # TODO Replace with appropriate storage for prod
+        storage_uri="memory://",
+    )
+
+    # Rate limit error handler
+    @app.errorhandler(429)
+    def rate_limit_exceeded(e):
+        email = session.get("email")
+        flash("Your have exceeded the allowed number of verification requests. Please wait and try again", "danger")
+        return redirect(url_for('verify_page'))
+    
+    @limiter.limit("1 per minute; 5 per hour")
+    def send_verification_email_limit(email):
+        token = generate_verification_token(email)
+        verification_url = url_for('verify_email', token=token, _external=True)
+        send_verification_email(mail, email, verification_url)
+
     login_manager.login_view = 'login'
     login_manager.login_message = None
 
@@ -65,7 +89,6 @@ def create_app():
     @login_required
     def index():
         return render_template('index.html')
-    
     
     @app.route('/login', methods=['GET', 'POST'])
     def login():
@@ -105,13 +128,8 @@ def create_app():
             
             if not user.is_verified:
                 session["email"] = user.email
-                # TODO Genreate non-verified users back to verification page 
-                token = generate_verification_token(user.email)
-                verification_url = url_for('verify_email', token=token, _external=True)
-                send_verification_email(mail, email, verification_url)
-
-                return render_template("verify.html", email=email)
-
+                send_verification_email_limit(user.email)
+                return redirect(url_for('verify_page'))
 
             login_user(user)
             flash(f"Welcome back, {user.name}!", "success")
@@ -222,19 +240,23 @@ def create_app():
             db.session.add(new_user)
             db.session.commit()
 
-            token = generate_verification_token(email)
-
-            # Creates verification link
-            verification_url = url_for('verify_email', token=token, _external=True)
-            send_verification_email(mail, email, verification_url)
+            send_verification_email_limit(email)
 
             # Save email to session
             session["email"] = email
 
-            return render_template("verify.html", email=email)
+            return redirect(url_for('verify_page'))
             
         return render_template("register.html")
     
+    @app.route("/verify-page")
+    def verify_page():
+        email = session.get("email")
+        if not email:
+            flash("Session expired or no email found. Please register again.", "danger")
+            return redirect(url_for('register'))
+        
+        return render_template('verify.html', email=email)
 
     @app.route("/verify-email/<token>")
     def verify_email(token):
@@ -266,8 +288,6 @@ def create_app():
 
     @app.route("/resend-verification", methods=['POST'])
     def resend_verification():
-
-        
         email = session.get('email')
 
         if not email:
@@ -279,13 +299,11 @@ def create_app():
             flash("Not account found with this email. Please register first.", "danger")
             return redirect(url_for('register'))
         
-        token = generate_verification_token(email)
-
-        verification_url = url_for('verify_email', token=token, _external=True)
-        send_verification_email(mail, email, verification_url)
+        # Generate and send new verification email
+        send_verification_email_limit(email)
 
         flash("A new verification link has been sent to your email.", "success")
-        return render_template("verify.html", email=email)
+        return redirect(url_for('verify_page'))
         
 
     @app.route('/logout')
