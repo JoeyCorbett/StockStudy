@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Reset - StockStudy
+{% endblock %}
+
+{% block content %}
+    <div class="container d-flex justify-content-center align-items-center mt-5">
+        <!-- Full height container for vertical centering -->
+        <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <h3 class="card-title mb-4 text-center">Reset your password</h3>
+                    <p class="card-text text-muted mb-4 text-center">
+                        Enter the email address associated with your account below and we'll send you a link to reset your password
+                    </p>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="mt-4">
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form action="{{ url_for('reset_password')}}" method="POST" class="d-grid">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Stockton Email</label>
+                            <input type="email" name="email" class="form-control" id="email" placeholder="username@go.stockton.edu" autocomplete="username" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <button class="btn btn-primary w-100" type="submit">Continue</button>
+                        </div> 
+                        <div class="text-center">
+                            <a href="{{ url_for('login') }}" class="text-primary link-modern">Return to login</a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <p class="text-center mt-3">
+                        New to StockStudy? <a href="/register" class="text-primary link-modern">Sign up here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

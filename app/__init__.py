@@ -8,7 +8,18 @@ from flask_limiter.util import get_remote_address
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from app.utils import is_valid_email, is_valid_name, is_valid_password, generate_verification_token, confirm_verification_token, send_verification_email
+from app.utils import (
+    is_valid_email,
+    is_valid_name,
+    is_valid_password,
+    generate_verification_token,
+    confirm_verification_token,
+    send_verification_email,
+    generate_reset_email,
+    confirm_reset_token,
+    send_reset_email,
+)
+import time
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -22,7 +33,7 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///StockStudy.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
     bcrypt.init_app(app)
@@ -61,17 +72,24 @@ def create_app():
     )
 
     # Rate limit error handler
+    # TODO Make redirect go off current page
     @app.errorhandler(429)
     def rate_limit_exceeded(e):
         email = session.get("email")
-        flash("Your have exceeded the allowed number of verification requests. Please wait and try again", "danger")
-        return redirect(url_for('verify_page'))
+        flash("Your have exceeded the allowed number of email requests. Please wait and try again", "danger")
+        return redirect(url_for('login', email=email))
     
     @limiter.limit("1 per minute; 5 per hour")
     def send_verification_email_limit(email):
         token = generate_verification_token(email)
         verification_url = url_for('verify_email', token=token, _external=True)
         send_verification_email(mail, email, verification_url)
+
+    @limiter.limit("1 per minute; 5 per hour")
+    def send_reset_email_limit(email):
+        token = generate_reset_email(email)
+        reset_url = url_for('reset_email', token=token, _external=True)
+        send_reset_email(mail, email, reset_url)
 
     login_manager.login_view = 'login'
     login_manager.login_message = None
@@ -142,6 +160,7 @@ def create_app():
         redirect_uri = url_for('authorize', _external=True)
         return google.authorize_redirect(redirect_uri)
     
+    
     @app.route('/login/callback')
     def authorize():
         try:
@@ -189,8 +208,10 @@ def create_app():
                 )
                 db.session.add(new_user)
                 db.session.commit()
+
                 login_user(new_user)
                 flash(f"Welcome, {new_user.name}!", "success")
+                
                 return redirect(url_for('index'))
         except OAuthError:
             flash("Authorization failed or was denied. Please try again.", "danger")
@@ -243,7 +264,7 @@ def create_app():
             send_verification_email_limit(email)
 
             # Save email to session
-            session["email"] = email
+            session["reg_email"] = email
 
             return redirect(url_for('verify_page'))
             
@@ -251,16 +272,19 @@ def create_app():
     
     @app.route("/verify-page")
     def verify_page():
-        email = session.get("email")
+        email = session.get("reg_email")
         if not email:
-            flash("Session expired or no email found. Please register again.", "danger")
-            return redirect(url_for('register'))
+            flash("Session expired or no email found.", "danger")
+            return redirect(url_for('login'))
         
         return render_template('verify.html', email=email)
 
     @app.route("/verify-email/<token>")
     def verify_email(token):
         email = confirm_verification_token(token)
+
+        # Clear Session
+        session.pop('reg_email', None)
 
         # Confirm token
         if not email:
@@ -280,15 +304,12 @@ def create_app():
         user.is_verified = True
         db.session.commit()
 
-        # Clear session
-        session.pop('email', None)
-
         flash("Your email has been verified! You can now log in", "success")
         return redirect(url_for('login'))
 
     @app.route("/resend-verification", methods=['POST'])
     def resend_verification():
-        email = session.get('email')
+        email = session.get('reg_email')
 
         if not email:
             flash("Session expired or no email found. Please register again.", "danger")
@@ -304,6 +325,116 @@ def create_app():
 
         flash("A new verification link has been sent to your email.", "success")
         return redirect(url_for('verify_page'))
+    
+
+    @app.route("/reset", methods=['GET', 'POST'])
+    def reset_password():
+        if request.method == 'POST':
+            email = request.form.get("email")
+
+            if not email:
+                flash("You must enter an email", "danger")
+                return redirect(url_for('reset_password'))
+            
+            if not is_valid_email(email):
+                flash("Please use a valid Stockton Email address.", "danger")
+                return redirect(url_for('reset_password'))
+            
+            
+            user = User.query.filter_by(email=email).first()
+            if user:
+                send_reset_email_limit(user.email)
+            else:
+                # Fake load time to prevent email enumeration
+                time.sleep(2.92)
+
+            session["reset_email"] = email
+            
+            return redirect(url_for('check_email'))
+
+        return render_template("reset.html")
+    
+    
+    @app.route("/check-email")
+    def check_email():
+        email = session.get("reset_email")
+        if not email:
+            flash("Session expired", "danger")
+            return redirect(url_for('reset_password'))
+        
+        return render_template('check-email.html', email=email)
+    
+    @app.route("/reset-email/<token>")
+    def reset_email(token):
+        email = confirm_reset_token(token)
+
+        # Confirm token
+        if not email:
+            flash("The reset link is invalid or has expired.", "danger")
+            return redirect(url_for('login'))
+        
+        session.pop("reset_email", None)
+        session['reset_verified_email'] = email
+    
+        return redirect(url_for('change_password'))
+    
+    @app.route('/resend-reset', methods=['POST'])
+    def resend_reset():
+        email = session.get('reset_email')
+        
+        if not email:
+            flash("Session expired", "danger")
+            return redirect(url_for('reset_password'))
+        
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            time.sleep(2.75)
+        else:
+            send_reset_email_limit(user.email)
+
+        flash(f"If {email} is an email on file, we have sent an email to help you reset your password.", "success")
+        return redirect(url_for('check_email'))
+
+
+    
+    @app.route("/change-password", methods=['GET', 'POST'])
+    def change_password():
+        if not session.get("reset_verified_email"):
+                flash("Unauthorized access or session expired.", "danger")
+                return redirect(url_for('reset_password'))
+        
+        if request.method == "POST":
+            reset_email = session.get('reset_verified_email')
+
+            if not reset_email:
+                flash("Unauthorized access or session expired.", "danger")
+                return redirect(url_for('reset_password'))
+
+            new_password = request.form.get("new-password")
+            confirm_password = request.form.get("new-confirm-password")
+
+            if new_password != confirm_password:
+                flash("Passwords do not match", "danger")
+                return redirect(url_for('change_password'))
+            
+            user = User.query.filter_by(email=reset_email).first()
+            if user.check_password(new_password):
+                flash("Password must not match recent passwords.", "danger")
+                return redirect(url_for('change_password'))
+            
+            if not is_valid_password(new_password):
+                flash("Password must be at least 8 characters long and include one letter, one number, and one special character.", "danger")
+                return redirect(url_for('change_password'))
+            
+            session.pop('reset_verified_email', None)
+            user.set_password(new_password)
+            db.session.commit()
+
+            flash("Password updated successfully.", "success")
+            return redirect(url_for('login'))
+        
+    
+        return render_template("change-password.html")
         
 
     @app.route('/logout')

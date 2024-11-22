@@ -19,10 +19,23 @@ def generate_verification_token(email):
     serializer = URLSafeTimedSerializer(os.getenv('SECRET_KEY'))
     return serializer.dumps(email, salt='email-confirmation-salt')
 
+def generate_reset_email(email):
+    serializer = URLSafeTimedSerializer(os.getenv('SECRET_KEY'))
+    return serializer.dumps(email, salt='password-reset-salt')
+
+
 def confirm_verification_token(token, expiration=3600):
     serializer = URLSafeTimedSerializer(os.getenv('SECRET_KEY'))
     try:
         email = serializer.loads(token, salt='email-confirmation-salt', max_age=expiration)
+        return email
+    except: 
+        return None
+    
+def confirm_reset_token(token, expiration=600):
+    serializer = URLSafeTimedSerializer(os.getenv('SECRET_KEY'))
+    try:
+        email = serializer.loads(token, salt='password-reset-salt', max_age=expiration)
         return email
     except: 
         return None
@@ -35,5 +48,14 @@ def send_verification_email(mail, email, verification_url):
         sender=os.getenv('MAIL_USERNAME'),
         recipients=[email],
         body=f"Please click the link to verify your email: {verification_url}"
+    )
+    mail.send(msg)
+
+def send_reset_email(mail, email, reset_url):
+    msg = Message(
+        "Reset Your Password",
+        sender=os.getenv('MAIL_USERNAME'),
+        recipients=[email],
+        body=f"Please click the link to reset your password: {reset_url}"
     )
     mail.send(msg)
