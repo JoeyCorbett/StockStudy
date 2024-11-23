@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Login - StockStudy
+    Register - StockStudy
 {% endblock %}
 
 {% block content %}
@@ -9,8 +9,8 @@
         <div class="col-12 col-md-8 col-lg-6 col-xl-5">
             <div class="card shadow-sm">
                 <div class="card-body p-5">
-                    <h3 class="card-title text-center mb-3">Log In to Your Account</h3>
-                    <h6 class="card-text text-muted text-center mb-4">	Sign in with your Stockton Google account or email below</h6>
+                    <h3 class="card-title text-center mb-3">Create Your Account</h3>
+                    <h6 class="card-text text-muted text-center mb-4">Register with Google or Stockton Email</h6>
 
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
@@ -25,7 +25,7 @@
                         {% endif %}
                     {% endwith %}
 
-                    <a href="/login/google" class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center border" type="button"><img src="https://img.icons8.com/color/16/000000/google-logo.png" class="me-2" alt="Google Logo">Sign in with Google</a>
+                    <a href="/login/google" class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center border" type="button"><img src="https://img.icons8.com/color/16/000000/google-logo.png" class="me-2" alt="Google Logo">Sign up with Google</a>
 
                     <div class="d-flex align-items-center mb-3">
                         <hr class="flex-grow-1">
@@ -33,24 +33,29 @@
                         <hr class="flex-grow-1">
                     </div>
                     
-                    <form method="POST" action="/login">
+                    <form method="POST" action="{{ url_for('auth.register') }}">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" name="name" class="form-control" id="name" placeholder="First and last name" autocomplete="name" required autofocus>
+                        </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">Stockton Email</label>
-                            <input type="email" name="email" class="form-control" id="email" placeholder="username@go.stockton.edu" autocomplete="username" required autofocus>
+                            <input type="email" name="email" class="form-control" id="email" placeholder="username@go.stockton.edu" autocomplete="username" required>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" name="password" class="form-control" id="password" placeholder="Enter your password" required autocomplete="new-password">
+                            <input type="password" name="password" class="form-control" id="password" placeholder="Enter your password" autocomplete="new-password" required>
                         </div>
-                        <div class="d-flex justify-content-between mb-3">
-                            <a href="{{ url_for('reset_password')}}" class="text-primary link-modern">Forgot password?</a>
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                            <input type="password" name="confirm_password" class="form-control" id="confirm_password" placeholder="Password (again)" autocomplete="new-password" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Log In</button>
+                        <button type="submit" class="btn btn-primary w-100">Register</button>
                     </form>
                 </div>
                 <div class="card-footer">
                     <p class="text-center mt-3">
-                        New to StockStudy? <a href="/register" class="text-primary link-modern">Create Account</a>
+                        Already have an account? <a href="{{ url_for('auth.login') }}" class="text-primary link-modern">Sign in</a>
                     </p>
                 </div>
             </div>

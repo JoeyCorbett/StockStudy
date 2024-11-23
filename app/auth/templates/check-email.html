@@ -6,7 +6,6 @@
 
 {% block content %}
     <div class="container d-flex justify-content-center align-items-center mt-5">
-        <!-- Full height container for vertical centering -->
         <div class="col-12 col-md-8 col-lg-6 col-xl-5">
             <div class="card shadow-sm">
                 <div class="card-body p-5">
@@ -14,7 +13,7 @@
                     <p class="card-text text-muted mb-4 text-center">
                         If <strong>{{ email }}</strong> matches an email we have on file, we'll send an email to help you reset your password.
                     </p>
-                    <form action="{{ url_for('resend_reset')}}" method="POST" class="d-grid">
+                    <form action="{{ url_for('auth.resend_reset')}}" method="POST" class="d-grid">
                         <button class="btn btn-primary" type="submit">Resend Reset Email</button>
                     </form>
 

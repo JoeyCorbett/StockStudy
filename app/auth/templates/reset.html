@@ -28,7 +28,7 @@
                         {% endif %}
                     {% endwith %}
                     
-                    <form action="{{ url_for('reset_password')}}" method="POST" class="d-grid">
+                    <form action="{{ url_for('auth.reset_password')}}" method="POST" class="d-grid">
                         <div class="mb-3">
                             <label for="email" class="form-label">Stockton Email</label>
                             <input type="email" name="email" class="form-control" id="email" placeholder="username@go.stockton.edu" autocomplete="username" required autofocus>
@@ -37,13 +37,13 @@
                             <button class="btn btn-primary w-100" type="submit">Continue</button>
                         </div> 
                         <div class="text-center">
-                            <a href="{{ url_for('login') }}" class="text-primary link-modern">Return to login</a>
+                            <a href="{{ url_for('auth.login') }}" class="text-primary link-modern">Return to login</a>
                         </div>
                     </form>
                 </div>
                 <div class="card-footer">
                     <p class="text-center mt-3">
-                        New to StockStudy? <a href="/register" class="text-primary link-modern">Sign up here</a>
+                        New to StockStudy? <a href="{{ url_for('auth.register') }}" class="text-primary link-modern">Sign up here</a>
                     </p>
                 </div>
             </div>

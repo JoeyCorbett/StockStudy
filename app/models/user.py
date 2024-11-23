@@ -1,4 +1,4 @@
-from app import db, bcrypt
+from app.extensions import db, bcrypt
 from datetime import datetime, timezone
 from flask_login import UserMixin
 
