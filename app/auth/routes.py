@@ -273,7 +273,7 @@ def reset_password():
         
         
         user = User.query.filter_by(email=email).first()
-        if user:
+        if user.is_google_user == 0:
             send_reset_email_limit(user.email)
         else:
             # Fake load time to prevent email enumeration
