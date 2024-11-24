@@ -82,7 +82,6 @@ def login():
             return redirect(url_for('auth.verify_page'))
 
         login_user(user)
-        flash(f"Welcome back, {user.name}!", "success")
         return redirect(url_for('main.index'))
 
     return render_template("login.html")
@@ -123,7 +122,6 @@ def authorize():
             if user.is_google_user:
                 # Log in Google user
                 login_user(user)
-                flash(f"Welcome, {user.name}!", "success")
                 return redirect(url_for('main.index'))
             else:
                 # Existing Manual Account
@@ -304,7 +302,7 @@ def reset_email(token):
         flash("The reset link is invalid or has expired.", "danger")
         return redirect(url_for('auth.login'))
     
-    session.permanent = True
+    #session.permanent = True
     session.pop("reset_email", None)
     session['reset_verified_email'] = email
 
@@ -373,5 +371,4 @@ def change_password():
 @login_required
 def logout():
     logout_user()
-    flash("You have been logged out.", "success")
     return redirect(url_for('auth.login'))

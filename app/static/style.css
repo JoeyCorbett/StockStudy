@@ -8,5 +8,13 @@
 
 body {
     margin: 0;
-    overflow: hidden;
+    overflow: auto;
   }
+
+  .hover-shadow {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.hover-shadow:hover {
+    transform: translateY(-4px) scale(1.01); /* Reduced movement and scale */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Subtle shadow */
+}

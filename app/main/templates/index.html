@@ -5,7 +5,9 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
+    <div class="container d-flex justify-content-center align-items-center flex-column">
+        <h1 class="my-4">Study Groups</h1>
+        <button class="btn btn-primary my-4" onclick="">Create Study Group</button>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -19,6 +21,37 @@
                 </div>
                 {% endif %}
         {% endwith %}
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 my-3">
+            {% for group in study_groups %}
+                <div class="col">
+                    <div class="card shadow-sm hover-shadow">
+                        <div class="card-header bg-white p-3">
+                            <h5 class="card-title mb-0">{{ group.name }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                <span class="badge p-2 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">{{ group.subject }}</span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Location:</strong> {{ group.location }}
+                            </p>
+                            <p class="card-text">
+                                <strong>Meeting Time:</strong> {{ group.meeting_time }}
+                            </p>
+                            <p class="card-text">
+                                <strong>Members:</strong> {{ group.current_members }} / {{ group.max_members }}
+                            </p>
+                            {% if group.current_members < group.max_members %}
+                                <button class="btn btn-primary w-100">Join Group</button>
+                            {% else %}
+                                <button class="btn btn-primary w-100" disabled>Full</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
 
 
     </div>
