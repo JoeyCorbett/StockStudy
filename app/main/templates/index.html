@@ -7,7 +7,9 @@
 {% block content %}
     <div class="container d-flex justify-content-center align-items-center flex-column">
         <h1 class="my-4">Study Groups</h1>
-        <button class="btn btn-primary my-4" onclick="">Create Study Group</button>
+        <button class="btn btn-primary my-4 px-4 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+            Create Study Group
+        </button>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -37,7 +39,7 @@
                                 <strong>Location:</strong> {{ group.location }}
                             </p>
                             <p class="card-text">
-                                <strong>Meeting Time:</strong> {{ group.meeting_time }}
+                                <strong>Description:</strong> {{ group.description }}
                             </p>
                             <p class="card-text">
                                 <strong>Members:</strong> {{ group.current_members }} / {{ group.max_members }}
@@ -52,8 +54,42 @@
                 </div>
             {% endfor %}
         </div>
+    </div>
 
-
+    <div class="modal fade" id="createGroupModal" tabindex="-1" aria-labelledby="createGroupModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content shadow-sm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createGroupModalLabel">Create Study Group</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form action="/create-group" method="POST">
+                        <div class="mb-3">
+                            <label for="group-name" class="form-label fw-bold">Group Name</label>
+                            <input type="text" class="form-control" id="group-name" name="group-name" placeholder="Enter group name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label fw-bold">Subject</label>
+                            <input type="text" class="form-control" id="subject" name="subject" placeholder="Enter subject name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-bold">Description</label>
+                            <textarea type="text" class="form-control" id="description" name="description" placeholder="Brief description of the group" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="location" class="form-label fw-bold">Location</label>
+                            <input type="text" class="form-control" id="location" name="location" placeholder="Enter location (e.g., Library Room 302 or Remote)" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="max-members" class="form-label fw-bold">Max Members</label>
+                            <input type="number" class="form-control" id="max-members" name="max-members" placeholder="Enter max number of members" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2 my-1">Create Group</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}
  

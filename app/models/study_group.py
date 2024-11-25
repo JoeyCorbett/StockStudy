@@ -8,7 +8,6 @@ class StudyGroup(db.Model):
     name = db.Column(db.String(100), nullable=False)
     subject = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    meeting_time = db.Column(db.DateTime, nullable=False)
     location = db.Column(db.String, nullable=False)
     max_members = db.Column(db.Integer, nullable=False)
     current_members = db.Column(db.Integer, default=0)
