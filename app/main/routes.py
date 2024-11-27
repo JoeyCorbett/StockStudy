@@ -1,5 +1,5 @@
 from flask import render_template, request, flash, redirect, url_for
-from flask_login import login_required
+from flask_login import login_required, current_user
 from app.main import main_bp
 from app.models.study_group import StudyGroup
 from app.extensions import db
@@ -30,8 +30,12 @@ def create_group():
             subject = subject,
             description = description,
             location = location,
-            max_members = int(max_members)
+            max_members = int(max_members),
+            owner=current_user
         )
+
+        # Add current user as member
+        new_group.members.append(current_user)
 
         db.session.add(new_group)
         db.session.commit()

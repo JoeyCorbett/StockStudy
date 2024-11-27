@@ -5,11 +5,13 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container d-flex justify-content-center align-items-center flex-column">
-        <h1 class="my-4">Study Groups</h1>
-        <button class="btn btn-primary my-4 px-4 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#createGroupModal">
-            Create Study Group
-        </button>
+    <div class="container">
+        <div class="text-center my-5">
+            <h1>Study Groups</h1>
+            <button class="btn btn-primary my-4 px-4 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+                Create Study Group
+            </button>
+        </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -21,10 +23,10 @@
                         </div>
                     {% endfor %}
                 </div>
-                {% endif %}
+            {% endif %}
         {% endwith %}
 
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 my-3">
+        <div class="row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-3 g-3 my-3">
             {% for group in study_groups %}
                 <div class="col">
                     <div class="card shadow-sm hover-shadow">
