@@ -47,7 +47,9 @@
                                 <strong>Members:</strong> {{ group.current_members }} / {{ group.max_members }}
                             </p>
                             {% if group.current_members < group.max_members %}
-                                <button class="btn btn-primary w-100">Join Group</button>
+                                <form action="/join-group" method="POST">
+                                    <button type="submit" name="group_id" class="btn btn-primary w-100" value="{{ group.id }}">Join Group</button>
+                                </form>
                             {% else %}
                                 <button class="btn btn-primary w-100" disabled>Full</button>
                             {% endif %}

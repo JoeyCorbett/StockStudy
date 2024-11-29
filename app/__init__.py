@@ -16,7 +16,7 @@ def create_app():
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///StockStudy.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
+  #  app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
 
     # Initialize Flask-Limiter
     limiter.init_app(app)

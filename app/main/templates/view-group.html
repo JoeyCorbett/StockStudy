@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ group.name }} - StockStudy
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h2 class="mb-0">{{ group.name }}</h2>
+            <p class="mb-0">Subject: <span class="fw-bold">{{ group.subject }}</span></p>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <h5>Description</h5>
+                <p>{{ group.description }}</p>
+            </div>
+            <div class="mb-3">
+                <h5>Location</h5>
+                <p>{{ group.location }}</p>
+            </div>
+            <div class="mb-3">
+                <h5>Owner</h5>
+                <p>{{ group.owner.name }}</p>
+            </div>
+            <div class="mb-3">
+                <h5>Members</h5>
+                <p>{{ group.current_members }} / {{ group.max_members }}</p>
+            </div>
+            <div class="mb-3">
+                <div class="w-50"> 
+                    <ul class="list-group">
+                    {% for member in members %}
+                        <li class="list-group-item">{{ member.name }}</li>
+                    {% endfor %}
+                    </div>
+                </ul>
+              </div>
+            <div class="mb-3">
+                <h5>Created On</h5>
+                <p>{{ group.created_at.strftime('%B %d, %Y') if group.created_at else 'Unknown' }}</p>
+            </div>
+            <form action="/leave-group" method="POST">
+                <button type="submit" name="group_id" class="btn btn-danger" value="{{ group.id }}">Leave Group</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
