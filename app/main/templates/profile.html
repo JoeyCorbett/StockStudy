@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Profile - StockStudy
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h2 class="mb-0">Profile</h2>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <h5>Name</h5>
+                <p>{{ user.name }}</p>
+            </div>
+            <div class="mb-3">
+                <h5>Email</h5>
+                <p>{{ user.email }}</p>
+            </div>
+            <div class="mb-3">
+                <h5>Bio</h5>
+                <p>None</p>
+            </div>
+            <div class="mb-3">
+                <h5>Major</h5>
+                <p>None</p>
+            </div>
+            <div class="mb-3">
+                <h5>Year of Study</h5>
+                <p>None</p>
+            </div>
+            <div class="mb-3">
+                <h5>Profile Picture</h5>
+                <p>None</p>
+            </div>
+            <div class="mb-3">
+                <button class="btn btn-primary">Set Up Profile</button>
+            </div>
+            <div class="mb-3">
+                <button class="btn btn-primary">Change Password</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

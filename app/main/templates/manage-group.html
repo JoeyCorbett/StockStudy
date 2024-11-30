@@ -13,6 +13,9 @@
         </div>
         <div class="card-body">
             <div class="mb-3">
+                <button class="btn btn-primary">Edit</button>
+            </div>
+            <div class="mb-3">
                 <h5>Description</h5>
                 <p>{{ group.description }}</p>
             </div>
@@ -33,7 +36,10 @@
                     {% for member in members %}
                         <li class="list-group-item d-flex align-items-center">
                             {{ member.name }}
-                            <button class="btn btn-primary btn-sm ms-auto">Email</button>
+                            <div class="ms-auto">
+                                <button class="btn btn-primary btn-sm">Email</button>
+                                <button class="btn btn-danger btn-sm">Remove</button>
+                            </div>
                         </li>
                     {% endfor %}
                     </ul>
@@ -43,8 +49,8 @@
                 <h5>Created On</h5>
                 <p>{{ group.created_at.strftime('%B %d, %Y') if group.created_at else 'Unknown' }}</p>
             </div>
-            <form action="/leave-group" method="POST">
-                <button type="submit" name="group_id" class="btn btn-danger" value="{{ group.id }}">Leave Group</button>
+            <form action="/delete-group" method="POST">
+                <button type="submit" name="group_id" class="btn btn-danger" value="{{ group.id }}">Delete Group</button>
             </form>
         </div>
     </div>

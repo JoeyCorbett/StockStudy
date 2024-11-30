@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Map - StockStudy
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Map - Centered on Stockton University</h5>
+                </div>
+                <div class="card-body p-0">
+                    <script>
+                        fetch('/map-data')
+                            .then(response => response.text())
+                            .then(script => eval(script));
+                    </script>
+                    <gmp-map center="39.49237060546875,-74.53160095214844" zoom="16" map-id="YOUR_MAP_ID" 
+                        style="height: 500px; width: 100%;">
+                        <gmp-advanced-marker position="39.49237060546875,-74.53160095214844" title="My location"></gmp-advanced-marker>
+                    </gmp-map>
+                </div>
+                <div class="card-footer text-muted">
+                    Map powered by Google Maps
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    gmp-map {
+        display: block;
+        height: 500px;
+        width: 100%;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa; /* Light gray background for contrast */
+    }
+</style>
+{% endblock %}

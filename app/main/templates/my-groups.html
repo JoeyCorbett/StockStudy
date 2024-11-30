@@ -1,18 +1,21 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Home - StockStudy
+    My Groups - StockStudy
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <div class="text-center my-5">
-            <h1>Study Groups</h1>
-            <button class="btn btn-primary my-4 px-4 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#createGroupModal">
-                Create Study Group
-            </button>
+    <div class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h1 class="fw-bold">My Study Groups</h1>
+           <div class="f-flex g-2 ms-auto">
+                <button class="btn btn-outline-primary my-4 px-4 py-2 m-1" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+                    Create Study Group
+                </button>
+                <a href="/find-groups" class="btn btn-primary py-2 px-4">Find New Groups</a>
+            </div>
         </div>
-
+        
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="container mb-3">
@@ -26,32 +29,32 @@
             {% endif %}
         {% endwith %}
 
-        <div class="row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-3 g-3 my-3">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
             {% for group in study_groups %}
                 <div class="col">
-                    <div class="card shadow-sm hover-shadow">
-                        <div class="card-header bg-white p-3">
-                            <h5 class="card-title mb-0">{{ group.name }}</h5>
-                        </div>
+                    <div class="card shadow-sm h-100 p-1">
                         <div class="card-body">
-                            <p class="card-text">
+                            <h5 class="card-title fw-bold">{{ group.name }}</h5>
+                            <p class="card-text my-3">
                                 <span class="badge p-2 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">{{ group.subject }}</span>
                             </p>
                             <p class="card-text">
                                 <strong>Location:</strong> {{ group.location }}
                             </p>
                             <p class="card-text">
-                                <strong>Description:</strong> {{ group.description }}
-                            </p>
-                            <p class="card-text">
                                 <strong>Members:</strong> {{ group.current_members }} / {{ group.max_members }}
                             </p>
-                            {% if group.current_members < group.max_members %}
-                                <form action="/join-group" method="POST">
-                                    <button type="submit" name="group_id" class="btn btn-primary w-100" value="{{ group.id }}">Join Group</button>
+                            <p class="card-text">
+                                <strong>Owner:</strong> {{ group.owner.name }}
+                            </p>
+                            {% if user == group.owner_id %}
+                                <form action="{{ url_for('main.manage_group') }}">
+                                    <button name="group_id" value="{{ group.id }}" class="btn btn-outline-primary py-2 btn-sm w-100">Manage Group</button>
                                 </form>
                             {% else %}
-                                <button class="btn btn-primary w-100" disabled>Full</button>
+                                <form action="{{ url_for('main.view_group') }}">
+                                    <button name="group_id" value="{{ group.id }}" class="btn btn-outline-primary py-2 btn-sm w-100">View Group</button>
+                                </form>
                             {% endif %}
                         </div>
                     </div>
@@ -95,5 +98,6 @@
             </div>
         </div>
     </div>
+
 {% endblock %}
  

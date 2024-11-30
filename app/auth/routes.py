@@ -43,7 +43,7 @@ def send_reset_email_limit(email):
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.my_groups'))
     
     if request.method == "POST":
         email = request.form.get("email")
@@ -82,7 +82,7 @@ def login():
             return redirect(url_for('auth.verify_page'))
 
         login_user(user)
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.my_groups'))
 
     return render_template("login.html")
 
@@ -122,7 +122,7 @@ def authorize():
             if user.is_google_user:
                 # Log in Google user
                 login_user(user)
-                return redirect(url_for('main.index'))
+                return redirect(url_for('main.my_groups'))
             else:
                 # Existing Manual Account
                 flash("This email is registered manually. Please log in using your Stockton email and password.", "danger")
@@ -141,7 +141,7 @@ def authorize():
             login_user(new_user)
             flash(f"Welcome, {new_user.name}!", "success")
             
-            return redirect(url_for('main.index'))
+            return redirect(url_for('main.my_groups'))
     except OAuthError:
         flash("Authorization failed or was denied. Please try again.", "danger")
         return redirect(url_for('auth.login'))
@@ -150,7 +150,7 @@ def authorize():
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.my_groups'))
     
     if request.method == "POST":
         name = request.form.get('name')

@@ -12,7 +12,7 @@
       <body>
         <nav class="navbar navbar-expand-md bg-body-tertiary border">
           <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="/">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.my_groups') }}">
               <img src="{{ url_for('static', filename='images/books.png') }}" 
                    alt="StockStudy Logo" 
                    width="30" 
@@ -26,13 +26,16 @@
               <ul class="navbar-nav ms-auto m-2">
                 {% if current_user.is_authenticated %}
                   <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/">Home</a>
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('main.my_groups') }}">My Groups</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.my_groups') }}">My Groups</a>
+                    <a class="nav-link" href="{{ url_for('main.find_groups') }}">Find Groups</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="/">Profile</a>
+                    <a class="nav-link" href="{{ url_for('main.map')}}">Map</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.profile') }}">Profile</a>
                   </li>
                   <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>

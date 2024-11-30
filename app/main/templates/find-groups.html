@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Find Groups - StockStudy
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-5 mb-5">
+        <div class="header py-4 px-3 text-center">
+            <h1 class="fw-bold">Find Study Groups</h1>
+            <p class="lead">Explore and join groups tailored to your interests and goals!</p>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mb-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    </div>
+
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <div class="me-3 mb-2 mb-md-0">
+            <label for="filter-subject" class="me-2 fw-bold">Filter by Subject:</label>
+            <select id="filter-subject" class="form-select d-inline-block" style="width: auto;" onchange="filterGroups()">
+                <option value="">All Subjects</option>
+                <option value="Python Programming">Python Programming</option>
+                <option value="Data Science">Data Science</option>
+                <option value="Web Development">Web Development</option>
+            </select>
+        </div>
+    
+        <div class="flex-grow-1 text-center mb-2 mb-md-0">
+            <form class="d-flex" role="search">
+                <input id="search-groups" class="form-control me-2" type="search" placeholder="Search groups..." aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+    
+        <div class="ms-3 mb-2 mb-md-0">
+            <label for="sort" class="me-2 fw-bold">Sort by:</label>
+            <select id="sort" class="form-select d-inline-block" style="width: auto;" onchange="sortGroups()">
+                <option value="recent">Recently Created</option>
+                <option value="members">Most Members</option>
+            </select>
+        </div>
+    </div>
+
+    <ul class="list-group">
+        {% for group in study_groups %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-1">{{ group.name }}</h5>
+                <p class="mb-0"><strong>Subject:</strong> {{ group.subject }}</p>
+                <p class="mb-0"><strong>Location:</strong> {{ group.location }}</p>
+                <p class="mb-0"><strong>Members:</strong> {{ group.current_members }} / {{ group.max_members }}</p>
+            </div>
+            <div>
+                {% if group.current_members < group.max_members %}
+                <form method="POST" action="/join-group">
+                    <input type="hidden" name="group_id" value="{{ group.id }}">
+                    <button class="btn btn-outline-primary btn">Join Group</button>
+                </form>
+                {% else %}
+                <button class="btn btn-secondary btn-sm" disabled>Group Full</button>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+ 
