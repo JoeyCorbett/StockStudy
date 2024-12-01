@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Welcome - StockStudy
+{% endblock %}
+
+{% block content %}
+    <section class="text-center py-5">
+        <div class="container py-5">
+            <h1 class="fw-bold display-4 mb-4">Level Up Your Study Sessions</h1>
+            <p class="lead text-muted mb-5">
+                Connect, collaborate, and conquer your academic goals with StockStudy. 
+                Join groups, schedule meetups, and find study spots around campus.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-dark px-3 py-2 shadow-sm">Sign In</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-light px-3 py-2 shadow-sm border">Register</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="container text-center py-5">
+        <h2 class="fw-bold mb-5">Why Join StockStudy?</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="icon mb-4" style="font-size: 2rem; color: #000;">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">Find Study Groups</h5>
+                        <p class="card-text text-muted">Discover groups tailored to your interests and subjects to enhance your learning experience.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="icon mb-4" style="font-size: 2rem; color: #000;">
+                            <i class="bi bi-pencil-square"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">Create Your Own Group</h5>
+                        <p class="card-text text-muted">Start a group with peers, set goals, and collaborate effectively.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="icon mb-4" style="font-size: 2rem; color: #000;">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">Find Study Spots</h5>
+                        <p class="card-text text-muted">Use our tailored map to find the best study spots around campus</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center py-4">
+        <p class="mb-0 text-muted">&copy; 2024 StockStudy. All rights reserved.</p>
+    </footer>
+{% endblock %}

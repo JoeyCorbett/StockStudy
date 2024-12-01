@@ -8,6 +8,10 @@ import requests
 
 GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY')
 
+@main_bp.route('/')
+def landing():
+    return render_template('landing.html')
+
 @main_bp.route('/map-data')
 def map_data():
     response = requests.get(
