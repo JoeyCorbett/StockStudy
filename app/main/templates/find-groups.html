@@ -30,9 +30,9 @@
             <label for="filter-subject" class="me-2 fw-bold">Filter by Subject:</label>
             <select id="filter-subject" class="form-select d-inline-block" style="width: auto;" onchange="filterGroups()">
                 <option value="">All Subjects</option>
-                <option value="Python Programming">Python Programming</option>
-                <option value="Data Science">Data Science</option>
-                <option value="Web Development">Web Development</option>
+                {% for subject in subjects %}
+                    <option value="{{ subject }}">{{ subject }}</option>
+                {% endfor %}
             </select>
         </div>
     
@@ -62,18 +62,34 @@
                 <p class="mb-0"><strong>Members:</strong> {{ group.current_members }} / {{ group.max_members }}</p>
             </div>
             <div>
-                {% if group.current_members < group.max_members %}
-                <form method="POST" action="/join-group">
-                    <input type="hidden" name="group_id" value="{{ group.id }}">
-                    <button class="btn btn-outline-primary btn">Join Group</button>
-                </form>
-                {% else %}
-                <button class="btn btn-secondary btn-sm" disabled>Group Full</button>
-                {% endif %}
+                <div class="d-flex gap-2 flex-column">
+                    {% if group.current_members < group.max_members %}
+                        <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#quickViewModal">Quick View</button>
+                        <form method="POST" action="/join-group">
+                            <input type="hidden" name="group_id" value="{{ group.id }}">
+                            <button class="btn btn-outline-primary btn-sm">Join Group</button>
+                        </form>
+                    {% else %}
+                    <button class="btn btn-secondary btn-sm" disabled>Group Full</button>
+                    {% endif %}
+                </div>
             </div>
         </li>
         {% endfor %}
     </ul>
+</div>
+
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModallLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md" id="quickViewModal">
+        <div class="modal-content shadow-sm">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createGroupModalLabel">Quick View</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
  

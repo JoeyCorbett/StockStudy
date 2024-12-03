@@ -9,10 +9,10 @@
         <div class="d-flex justify-content-between align-items-center mb-5">
             <h1 class="fw-bold">My Study Groups</h1>
            <div class="f-flex g-2 ms-auto">
-                <button class="btn btn-outline-primary my-4 px-4 py-2 m-1" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+                <button class="btn btn-outline-primary my-4 m-1" data-bs-toggle="modal" data-bs-target="#createGroupModal">
                     Create Study Group
                 </button>
-                <a href="/find-groups" class="btn btn-primary py-2 px-4">Find New Groups</a>
+                <a href="/find-groups" class="btn btn-primary">Find New Groups</a>
             </div>
         </div>
         
@@ -48,12 +48,12 @@
                                 <strong>Owner:</strong> {{ group.owner.name }}
                             </p>
                             {% if user == group.owner_id %}
-                                <form action="{{ url_for('main.manage_group') }}">
-                                    <button name="group_id" value="{{ group.id }}" class="btn btn-outline-primary py-2 btn-sm w-100">Manage Group</button>
+                                <form action="{{ url_for('main.manage_group', group_id=group.id) }}">
+                                    <button class="btn btn-outline-primary py-2 btn-sm w-100">Manage Group</button>
                                 </form>
                             {% else %}
-                                <form action="{{ url_for('main.view_group') }}">
-                                    <button name="group_id" value="{{ group.id }}" class="btn btn-outline-primary py-2 btn-sm w-100">View Group</button>
+                                <form action="{{ url_for('main.view_group', group_id=group.id) }}">
+                                    <button class="btn btn-outline-primary py-2 btn-sm w-100">View Group</button>
                                 </form>
                             {% endif %}
                         </div>

@@ -6,40 +6,54 @@
 
 {% block content %}
 <div class="container my-5">
-    <div class="card shadow-sm">
-        <div class="card-header">
-            <h2 class="mb-0">Profile</h2>
+    <div class="card shadow-sm rounded">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="mb-0 fw-bold">Your Profile</h2>
+            <button class="btn btn-outline-primary px-4 py-2">Edit Profile</button>
         </div>
         <div class="card-body">
-            <div class="mb-3">
-                <h5>Name</h5>
-                <p>{{ user.name }}</p>
+            <div class="row mb-4">
+                <div class="col-md-4 text-center">
+                    <div class="d-flex flex-column align-items-center">
+                        <img 
+                            src="{{ user.profile_picture or url_for('static', filename='images/default-profile.png') }}" 
+                            alt="Profile Picture" 
+                            class="img-fluid rounded-circle mb-3"
+                            style="width: 150px; height: 150px; object-fit: cover;"
+                        >
+                        <button class="btn btn-outline-secondary btn-sm">Change Picture</button>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <h5 class="fw-bold">Name</h5>
+                        <p class="text-muted">{{ user.name }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h5 class="fw-bold">Email</h5>
+                        <p class="text-muted">{{ user.email }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h5 class="fw-bold">Bio</h5>
+                        <p class="text-muted">{{ user.bio or 'No bio available.' }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h5 class="fw-bold">Major</h5>
+                        <p class="text-muted">{{ user.major or 'Not set.' }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h5 class="fw-bold">Year of Study</h5>
+                        <p class="text-muted">{{ user.year_of_study or 'Not specified.' }}</p>
+                    </div>
+                </div>
             </div>
-            <div class="mb-3">
-                <h5>Email</h5>
-                <p>{{ user.email }}</p>
-            </div>
-            <div class="mb-3">
-                <h5>Bio</h5>
-                <p>None</p>
-            </div>
-            <div class="mb-3">
-                <h5>Major</h5>
-                <p>None</p>
-            </div>
-            <div class="mb-3">
-                <h5>Year of Study</h5>
-                <p>None</p>
-            </div>
-            <div class="mb-3">
-                <h5>Profile Picture</h5>
-                <p>None</p>
-            </div>
-            <div class="mb-3">
-                <button class="btn btn-primary">Set Up Profile</button>
-            </div>
-            <div class="mb-3">
-                <button class="btn btn-primary">Change Password</button>
+            <div class="row">
+                <div class="col-md-6 mb-2">
+                    <button class="btn btn-primary w-100 py-2">Set Up Profile</button>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <button class="btn btn-outline-primary w-100 py-2">Change Password</button>
+                </div>
             </div>
         </div>
     </div>

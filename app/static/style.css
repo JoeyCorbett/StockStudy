@@ -23,8 +23,8 @@ h1 {
     font-family: 'Roboto', sans-serif;
 }
 
-.modal-dialog {
-    margin-top: 70px;
+#quickViewModal {
+    margin-top: 110px;
 }
 
 

@@ -72,8 +72,12 @@ def find_groups():
     for group in all_groups:
         if current_user not in group.members and group.owner_id != current_user.id:
             filtered_groups.append(group)
+
+    subjects = []
+    for group in filtered_groups:
+        subjects.append(group.subject)
     
-    return render_template('find-groups.html', study_groups=filtered_groups)
+    return render_template('find-groups.html', study_groups=filtered_groups, subjects=subjects)
 
 @main_bp.route("/profile")
 @login_required
@@ -116,11 +120,9 @@ def join_group():
     
     return redirect(url_for('main.find_groups'))
 
-@main_bp.route("/view-group", methods=['GET'])
+@main_bp.route("/group/<group_id>", methods=['GET'])
 @login_required
-def view_group():
-    group_id = request.args.get("group_id")
-
+def view_group(group_id):
     if not group_id:
         flash("Invalid Group ID", "danger")
         return redirect(url_for('main.my_groups'))
@@ -136,13 +138,11 @@ def view_group():
         flash("You are not a member of this group.", "danger")
         return redirect(url_for('main.my_groups'))
      
-    return render_template("view-group.html", group=group, members=group.members)
+    return render_template("view-group.html", group=group, members=group.members, user=current_user)
 
-@main_bp.route("/manage-group")
+@main_bp.route("/manage-group/<group_id>", methods=['GET'])
 @login_required
-def manage_group():
-    group_id = request.args.get("group_id")
-
+def manage_group(group_id):
     if not group_id:
         flash("Invalid Group ID", "danger")
         return redirect(url_for('main.my_groups'))
@@ -158,7 +158,7 @@ def manage_group():
         flash("You are not the owner of this group.", "danger")
         return redirect(url_for('main.my_groups'))
      
-    return render_template("manage-group.html", group=group, members=group.members)
+    return render_template("manage-group.html", group=group, members=group.members, user=current_user)
     
 
 @main_bp.route("/leave-group", methods=['POST'])

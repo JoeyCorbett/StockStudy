@@ -5,31 +5,35 @@
 {% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-10">
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h5 class="mb-0">Map - Centered on Stockton University</h5>
-                </div>
-                <div class="card-body p-0">
-                    <script>
-                        fetch('/map-data')
-                            .then(response => response.text())
-                            .then(script => eval(script));
-                    </script>
-                    <gmp-map center="39.49237060546875,-74.53160095214844" zoom="16" map-id="YOUR_MAP_ID" 
-                        style="height: 500px; width: 100%;">
-                        <gmp-advanced-marker position="39.49237060546875,-74.53160095214844" title="My location"></gmp-advanced-marker>
-                    </gmp-map>
-                </div>
-                <div class="card-footer text-muted">
-                    Map powered by Google Maps
-                </div>
-            </div>
+<div class="container-fluid p-0">
+    <div class="card shadow-sm rounded">
+        <div class="card-header d-flex justify-content-between align-items-center bg-light">
+            <h5 class="mb-0 fw-bold">Map of Study Spots</h5>
+            <button class="btn btn-outline-primary btn-sm">Add Study Spot</button>
+        </div>
+        <div class="card-body p-0" style="height: calc(100vh - 220px);">
+            <script>
+                fetch('/map-data')
+                    .then(response => response.text())
+                    .then(script => eval(script));
+            </script>
+            <gmp-map 
+                center="39.49237060546875,-74.53160095214844" 
+                zoom="17" 
+                map-id="YOUR_MAP_ID" 
+                style="height: 90%; width: 100%;">
+                <gmp-advanced-marker 
+                    position="39.49237060546875,-74.53160095214844" 
+                    title="Stockton University">
+                </gmp-advanced-marker>
+            </gmp-map>
+        </div>
+        <div class="card-footer text-muted text-center">
+            Map powered by <a href="https://maps.google.com" target="_blank" class="text-decoration-none">Google Maps</a>
         </div>
     </div>
 </div>
+
 
 <style>
     gmp-map {

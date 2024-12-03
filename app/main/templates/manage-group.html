@@ -1,57 +1,70 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {{ group.name }} - StockStudy
+    Manage {{ group.name }} - StockStudy
 {% endblock %}
 
 {% block content %}
 <div class="container my-5">
-    <div class="card shadow-sm">
-        <div class="card-header">
-            <h2 class="mb-0">{{ group.name }}</h2>
-            <p class="mb-0">Subject: <span class="fw-bold">{{ group.subject }}</span></p>
+    <div class="card shadow-sm rounded">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-0 fw-bold">{{ group.name }}</h2>
+                <p class="mb-0">
+                    Subject: <span class="fw-semibold">{{ group.subject }}</span>
+                </p>
+            </div>
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <button class="btn btn-primary btn-sm">Edit Group</button>
+                <span class="badge bg-secondary py-2 px-3">{{ group.current_members }} / {{ group.max_members }} Members</span>
+            </div>
         </div>
         <div class="card-body">
-            <div class="mb-3">
-                <button class="btn btn-primary">Edit</button>
+            <div class="mb-4">
+                <h5 class="fw-bold">Description</h5>
+                <p class="text-muted">{{ group.description }}</p>
             </div>
-            <div class="mb-3">
-                <h5>Description</h5>
-                <p>{{ group.description }}</p>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5 class="fw-bold">Location</h5>
+                    <p class="text-muted">{{ group.location }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="fw-bold">Owner</h5>
+                    <p class="text-muted">{{ group.owner.name }}</p>
+                </div>
             </div>
-            <div class="mb-3">
-                <h5>Location</h5>
-                <p>{{ group.location }}</p>
-            </div>
-            <div class="mb-3">
-                <h5>Owner</h5>
-                <p>{{ group.owner.name }}</p>
-            </div>
-            <div class="mb-3">
-                <span><strong>Members</strong> - ({{ group.current_members }} / {{ group.max_members }})</span>
-            </div>
-            <div class="mb-3">
-                <div> 
-                    <ul class="list-group">
+            <div class="mb-4">
+                <h5 class="fw-bold">Members</h5>
+                <ul class="list-group">
                     {% for member in members %}
                         <li class="list-group-item d-flex align-items-center">
-                            {{ member.name }}
+                            <span class="fw-semibold">{{ member.name }}</span>
                             <div class="ms-auto">
-                                <button class="btn btn-primary btn-sm">Email</button>
-                                <button class="btn btn-danger btn-sm">Remove</button>
+                                {% if member != user %}
+                                    <button onclick="copyToClipboard('{{ member.email }}', this)" class="btn btn-outline-primary btn-sm">Contact</button>
+                                    <button class="btn btn-danger btn-sm">Remove</button>
+                                {% endif %}
                             </div>
                         </li>
                     {% endfor %}
-                    </ul>
-                </div>  
+                </ul>
             </div>
-            <div class="mb-3">
-                <h5>Created On</h5>
-                <p>{{ group.created_at.strftime('%B %d, %Y') if group.created_at else 'Unknown' }}</p>
+            <div class="row mb-1">
+                <div class="col-md-6">
+                    <h5 class="fw-bold">Created On</h5>
+                    <p class="text-muted">
+                        {{ group.created_at.strftime('%B %d, %Y') if group.created_at else 'Unknown' }}
+                    </p>
+                </div>
+                <div class="col-md-6 d-flex justify-content-md-end">
+                    <form action="/delete-group" method="POST" class="mt-2">
+                        <button type="submit" name="group_id" class="btn btn-danger btn-sm p-2" value="{{ group.id }}">
+                            Delete Group
+                        </button>
+                    </form>
+                </div>
             </div>
-            <form action="/delete-group" method="POST">
-                <button type="submit" name="group_id" class="btn btn-danger" value="{{ group.id }}">Delete Group</button>
-            </form>
         </div>
     </div>
 </div>
