@@ -14,8 +14,16 @@ class StudyGroup(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id', name="fk_owner_id_users"), nullable=False)
     
-    owner = db.relationship('User', back_populates='owned_groups')
-    members = db.relationship('User', secondary='user_groups', back_populates='study_groups')
+    owner = db.relationship(
+        'User',
+         back_populates='owned_groups',
+        )
+    members = db.relationship(
+        'User',
+        secondary='user_groups',
+        back_populates='study_groups',
+        cascade="all, delete"
+      )
 
   
     def __repr__(self):

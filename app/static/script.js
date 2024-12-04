@@ -11,3 +11,8 @@ async function copyToClipboard(email, buttonElement) {
         buttonElement.textContent = "Failed to Copy";
     }
 }
+
+function setDeleteAction(groupID) {
+    const deleteForm = document.getElementById('deleteGroupForm');
+    deleteForm.action =  `/delete-group/${groupID}`;
+}

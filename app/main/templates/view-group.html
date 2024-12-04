@@ -52,8 +52,8 @@
                     </p>
                 </div>
                 <div class="col-md-6 d-flex justify-content-md-end">
-                    <form action="/leave-group" method="POST" class="mt-2">
-                        <button type="submit" name="group_id" class="btn btn-danger px-3 py-2" value="{{ group.id }}">
+                    <form action="{{ url_for('main.leave_group', group_id=group_id) }}" method="POST" class="mt-2">
+                        <button type="submit" name="group_id" class="btn btn-danger px-3 py-2">
                             Leave Group
                         </button>
                     </form>

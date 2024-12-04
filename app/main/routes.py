@@ -138,7 +138,7 @@ def view_group(group_id):
         flash("You are not a member of this group.", "danger")
         return redirect(url_for('main.my_groups'))
      
-    return render_template("view-group.html", group=group, members=group.members, user=current_user)
+    return render_template("view-group.html", group=group, members=group.members, user=current_user, group_id=group_id)
 
 @main_bp.route("/manage-group/<group_id>", methods=['GET'])
 @login_required
@@ -158,14 +158,12 @@ def manage_group(group_id):
         flash("You are not the owner of this group.", "danger")
         return redirect(url_for('main.my_groups'))
      
-    return render_template("manage-group.html", group=group, members=group.members, user=current_user)
+    return render_template("manage-group.html", group=group, members=group.members, user=current_user, group_id=group_id)
     
 
-@main_bp.route("/leave-group", methods=['POST'])
+@main_bp.route("/leave-group/<group_id>", methods=['POST'])
 @login_required
-def leave_group():
-    group_id = request.form.get("group_id")
-
+def leave_group(group_id):
     if not group_id:
         flash("Invalid Group ID", "danger")
         return redirect(url_for('main.my_groups'))
@@ -191,19 +189,19 @@ def leave_group():
 
     return redirect(url_for("main.my_groups"))
     
-@main_bp.route("/delete-group", methods=['POST'])
+@main_bp.route("/delete-group/<group_id>", methods=['POST'])
 @login_required
-def delete_group():
-    group_id = request.form.get("group_id")
-
+def delete_group(group_id):
     group = StudyGroup.query.get(group_id)
     if current_user.id != group.owner_id:
-        flash("You are not the owner of this group", "danger")
+        flash("You do not have permission to delete this group", "danger")
         return redirect(url_for('main.my_groups'))
     
+    group.members.clear()
+    db.session.delete(group)
+    db.session.commit()
 
-    # group.members.clear()
-
+    flash(f"Study group '{group.name}' deleted successfully", "success")
     return redirect(url_for('main.my_groups'))
 
 
