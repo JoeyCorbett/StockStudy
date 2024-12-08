@@ -159,19 +159,33 @@ def manage_group(group_id):
      
     return render_template("manage-group.html", group=group, members=group.members, user=current_user, group_id=group_id)
 
-@main_bp.route("/remove-member/<member_id>")
+@main_bp.route("/remove-member/<group_id>/<member_id>", methods=['POST'])
 @login_required
-def remove_member(member_id):
-    if not member_id:
-        flash("Invalid member ID", "danger")
-        return redirect(url_for('manage_group'))
+def remove_member(group_id, member_id):
+    if not member_id or not group_id:
+        flash("Invalid member or group ID", "danger")
+        return redirect(url_for('main.manage_group', group_id=group_id))
     
-    member = User.get(member_id)
+    member = User.query.get(member_id)
     if not member:
         flash("Member not found", "danger")
-        return redirect(url_for('manage_group'))
+        return redirect(url_for('main.manage_group', group_id=group_id))
     
+    group = StudyGroup.query.get(group_id)
+    if not group:
+        flash("Group not found", "danger")
+        return redirect(url_for('main.manage_group', group_id=group_id))
     
+    try:
+        group.members.remove(member)
+        group.current_members -= 1
+        db.session.commit()
+        flash(f"You have removed {member.name} from the group", "info")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"An error occured: {str(e)}", "danger")
+
+    return redirect(url_for('main.manage_group', group_id=group_id))    
 
 
 @main_bp.route("/leave-group/<group_id>", methods=['POST'])

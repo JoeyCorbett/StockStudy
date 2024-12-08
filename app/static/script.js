@@ -22,7 +22,7 @@ function setLeaveAction(groupID) {
     leaveForm.action = `/leave-group/${groupID}`;
 }
 
-function setRemoveAction(memberID) {
+function setRemoveAction(groupID, memberID) {
     const removeForm = document.getElementById('removeMemberForm')
-    removeForm.action = `/remove-member/${memberID}`;
+    removeForm.action = `/remove-member/${groupID}/${memberID}`;
 }
