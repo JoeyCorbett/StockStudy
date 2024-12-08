@@ -2,6 +2,7 @@ import os
 from flask import render_template, request, flash, redirect, url_for
 from flask_login import login_required, current_user
 from app.main import main_bp
+from app.models.user import User
 from app.models.study_group import StudyGroup
 from app.extensions import db
 import requests
@@ -32,10 +33,9 @@ def create_group():
     group_name = request.form.get("group-name")
     subject = request.form.get("subject")
     description = request.form.get("description")
-    location = request.form.get("location")
-    max_members = request.form.get("max-members")
+    group_type = request.form.get("group-type")
 
-    if not group_name or not subject or not description or not location or not max_members:
+    if not group_name or not subject or not description or not group_type:
         flash("All fields are required!", "danger")
         return redirect(url_for('main.my_groups'))
     
@@ -44,8 +44,7 @@ def create_group():
             name = group_name,
             subject = subject,
             description = description,
-            location = location,
-            max_members = int(max_members),
+            group_type = group_type,
             owner=current_user
         )
 
@@ -159,7 +158,21 @@ def manage_group(group_id):
         return redirect(url_for('main.my_groups'))
      
     return render_template("manage-group.html", group=group, members=group.members, user=current_user, group_id=group_id)
+
+@main_bp.route("/remove-member/<member_id>")
+@login_required
+def remove_member(member_id):
+    if not member_id:
+        flash("Invalid member ID", "danger")
+        return redirect(url_for('manage_group'))
     
+    member = User.get(member_id)
+    if not member:
+        flash("Member not found", "danger")
+        return redirect(url_for('manage_group'))
+    
+    
+
 
 @main_bp.route("/leave-group/<group_id>", methods=['POST'])
 @login_required

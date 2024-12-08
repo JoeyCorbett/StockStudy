@@ -58,19 +58,19 @@
             <div>
                 <h5 class="mb-1">{{ group.name }}</h5>
                 <p class="mb-0"><strong>Subject:</strong> {{ group.subject }}</p>
-                <p class="mb-0"><strong>Location:</strong> {{ group.location }}</p>
-                <p class="mb-0"><strong>Members:</strong> {{ group.current_members }} / {{ group.max_members }}</p>
+                <p class="mb-0"><strong>Type:</strong> {{ group.group_type.capitalize() }}</p>
+                <p class="mb-0"><strong>Members:</strong> {{ group.current_members }}</p>
             </div>
             <div>
-                <div class="d-flex gap-2 flex-column">
-                    {% if group.current_members < group.max_members %}
-                        <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#quickViewModal">Quick View</button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#quickViewModal">Quick View</button>
+                    {% if group.group_type == 'public' %}
                         <form method="POST" action="/join-group">
                             <input type="hidden" name="group_id" value="{{ group.id }}">
                             <button class="btn btn-outline-primary btn-sm">Join Group</button>
                         </form>
                     {% else %}
-                    <button class="btn btn-secondary btn-sm" disabled>Group Full</button>
+                    <button class="btn btn-outline-primary btn-sm">Request to Join</button>
                     {% endif %}
                 </div>
             </div>

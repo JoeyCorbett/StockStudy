@@ -14,5 +14,15 @@ async function copyToClipboard(email, buttonElement) {
 
 function setDeleteAction(groupID) {
     const deleteForm = document.getElementById('deleteGroupForm');
-    deleteForm.action =  `/delete-group/${groupID}`;
+    deleteForm.action = `/delete-group/${groupID}`;
+}
+
+function setLeaveAction(groupID) {
+    const leaveForm = document.getElementById('leaveGroupForm');
+    leaveForm.action = `/leave-group/${groupID}`;
+}
+
+function setRemoveAction(memberID) {
+    const removeForm = document.getElementById('removeMemberForm')
+    removeForm.action = `/remove-member/${memberID}`;
 }

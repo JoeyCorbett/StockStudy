@@ -38,11 +38,16 @@
                             <p class="card-text my-3">
                                 <span class="badge p-2 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">{{ group.subject }}</span>
                             </p>
+                            <hr class="my-3">
+                            <p class="card-text text-muted text-truncate">
+                                {{ group.description }}
+                            </p>
+                            <hr class="my-3">
                             <p class="card-text">
-                                <strong>Location:</strong> {{ group.location }}
+                                <strong>Type:</strong> {{ group.group_type.capitalize() }}
                             </p>
                             <p class="card-text">
-                                <strong>Members:</strong> {{ group.current_members }} / {{ group.max_members }}
+                                <strong>Members:</strong> {{ group.current_members }}
                             </p>
                             <p class="card-text">
                                 <strong>Owner:</strong> {{ group.owner.name }}
@@ -85,12 +90,27 @@
                             <textarea type="text" class="form-control" id="description" name="description" placeholder="Brief description of the group" rows="3" required></textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="location" class="form-label fw-bold">Location</label>
-                            <input type="text" class="form-control" id="location" name="location" placeholder="Enter location (e.g., Library Room 302 or Remote)" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="max-members" class="form-label fw-bold">Max Members</label>
-                            <input type="number" class="form-control" id="max-members" name="max-members" placeholder="Enter max number of members" required>
+                            <label class="form-label fw-bold">Group Type</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="radio" class="btn-check" name="group-type" id="group-type-public" value="public" required>
+                                    <label class="btn btn-light border rounded shadow-sm w-100" for="group-type-public">
+                                        <div class="text-center py-2">
+                                            <h6 class="fw-bold">Public</h6>
+                                            <small class="text-muted">Anyone can join this group</small>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="radio" class="btn-check" name="group-type" id="group-type-private" value="private">
+                                    <label class="btn btn-light border rounded shadow-sm w-100" for="group-type-private">
+                                        <div class="text-center py-2">
+                                            <h6 class="fw-bold">Private</h6>
+                                            <small class="text-muted">Requires approval to join</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 py-2 my-1">Create Group</button>
                     </form>

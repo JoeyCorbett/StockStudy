@@ -1,8 +1,8 @@
-"""Initial migration with StudyGroup and User models
+"""Initial migration
 
-Revision ID: eca8474aa3a1
+Revision ID: 178e842fc064
 Revises: 
-Create Date: 2024-11-27 11:57:13.329728
+Create Date: 2024-12-06 23:35:06.655892
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'eca8474aa3a1'
+revision = '178e842fc064'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -37,8 +37,9 @@ def upgrade():
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('subject', sa.String(length=100), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('location', sa.String(), nullable=False),
-    sa.Column('max_members', sa.Integer(), nullable=False),
+    sa.Column('group_type', sa.String(length=10), nullable=False),
+    sa.Column('location', sa.String(), nullable=True),
+    sa.Column('max_members', sa.Integer(), nullable=True),
     sa.Column('current_members', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('owner_id', sa.Integer(), nullable=False),

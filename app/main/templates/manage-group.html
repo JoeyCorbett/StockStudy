@@ -16,7 +16,7 @@
             </div>
             <div class="ms-auto d-flex align-items-center gap-3">
                 <button class="btn btn-primary btn-sm">Edit Group</button>
-                <span class="badge bg-secondary py-2 px-3">{{ group.current_members }} / {{ group.max_members }} Members</span>
+                <span class="badge bg-secondary py-2 px-3">Members: {{ group.current_members }}</span>
             </div>
         </div>
         <div class="card-body">
@@ -43,7 +43,7 @@
                             <div class="ms-auto">
                                 {% if member != user %}
                                     <button onclick="copyToClipboard('{{ member.email }}', this)" class="btn btn-outline-primary btn-sm">Contact</button>
-                                    <button class="btn btn-danger btn-sm">Remove</button>
+                                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmRemoveModal" onclick="setRemoveAction('{{ memberID }}')">Remove</button>
                                 {% endif %}
                             </div>
                         </li>
@@ -69,7 +69,7 @@
     </div>
 </div>
 
-
+<!-- Group Deletion Confirmation Modal -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -84,6 +84,27 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="deleteGroupForm" method="POST">
                     <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Member Removal Confirmation Modal-->
+<div class="modal fade" id="confirmRemoveModal" tabindex="-1" aria-labelledby="confirmRemoveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmRemoveModalLabel">Confirm Removal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to remove this member? 
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="removeMemberForm" method="POST">
+                    <button type="submit" class="btn btn-danger">Remove</button>
                 </form>
             </div>
         </div>
