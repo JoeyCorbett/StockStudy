@@ -63,7 +63,19 @@
             </div>
             <div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#quickViewModal">Quick View</button>
+                    <button class="btn btn-outline-success btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#quickViewModal"
+                            data-group-id="{{ group.id }}"
+                            data-group-name="{{ group.name }}"
+                            data-group-subject="{{ group.subject }}"
+                            data-group-owner = "{{ group.owner.name }}"
+                            data-group-description="{{ group.description }}"
+                            data-group-type="{{ group.group_type }}"
+                            data-group-members="{{ group.current_members }}"
+                            data-group-location="{{ group.location }}">
+                            Quick View
+                    </button>
                     {% if group.group_type == 'public' %}
                         <form method="POST" action="/join-group">
                             <input type="hidden" name="group_id" value="{{ group.id }}">
@@ -79,14 +91,40 @@
     </ul>
 </div>
 
-<div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModallLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md" id="quickViewModal">
-        <div class="modal-content shadow-sm">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createGroupModalLabel">Quick View</h5>
+<div class="modal fade" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="quickViewModalLabel">Quick View</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4">
+            <div class="modal-body">
+                <div class="mb-3">
+                    <span class="badge p-2 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3 modal-subject">Subject</span>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-secondary">Owner:</h6>
+                    <p class="modal-owner fw-semibold">Owner's Name</p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-secondary">Description:</h6>
+                    <p class="modal-description">Group Description</p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-secondary">Type:</h6>
+                    <p class="modal-type">Group Type</p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-secondary">Members:</h6>
+                    <ul class="list-group" id="modal-members-list"></ul>
+                </div>
+                <div class="mb-3">
+                    <h6 class="text-secondary">Location:</h6>
+                    <p class="modal-location">Location Details</p>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
