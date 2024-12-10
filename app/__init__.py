@@ -7,6 +7,7 @@ from app.auth import auth_bp
 from app.main import main_bp
 from app.models.user import User
 from app.models.study_group import StudyGroup
+from app.models.membership_requests import GroupJoinRequest
 
 load_dotenv()
 

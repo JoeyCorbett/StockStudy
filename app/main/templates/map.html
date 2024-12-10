@@ -9,9 +9,12 @@
     <div class="card shadow-sm rounded">
         <div class="card-header d-flex justify-content-between align-items-center bg-light">
             <h5 class="mb-0 fw-bold">Map of Study Spots</h5>
-            <button class="btn btn-outline-primary btn-sm">Add Study Spot</button>
+            <button class="btn btn-outline-primary btn-sm" disabled>Coming Soon</button>
         </div>
-        <div class="card-body p-0" style="height: calc(100vh - 220px);">
+        <div class="card-body p-0 text-center" style="height: calc(100vh - 320px);">
+            <div class="alert alert-info mt-3">
+                <h5>Explore Study Spots - Coming Soon!</h5>
+            </div>
             <script>
                 fetch('/map-data')
                     .then(response => response.text())
@@ -21,7 +24,7 @@
                 center="39.49237060546875,-74.53160095214844" 
                 zoom="17" 
                 map-id="YOUR_MAP_ID" 
-                style="height: 90%; width: 100%;">
+                style="height: 90%; width: 100%; display: block;">
                 <gmp-advanced-marker 
                     position="39.49237060546875,-74.53160095214844" 
                     title="Stockton University">
@@ -33,7 +36,6 @@
         </div>
     </div>
 </div>
-
 
 <style>
     gmp-map {

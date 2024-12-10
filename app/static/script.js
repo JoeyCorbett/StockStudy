@@ -33,7 +33,6 @@ document.addEventListener('show.bs.modal', function (event) {
     if (modal.id == 'quickViewModal') {
         const button = event.relatedTarget;
 
-        const groupId = button.getAttribute('data-group-id');
         const groupName = button.getAttribute('data-group-name');
         const groupSubject = button.getAttribute('data-group-subject');
         const groupOwner = button.getAttribute('data-group-owner');
