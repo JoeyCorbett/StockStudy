@@ -4,6 +4,7 @@ from flask_login import login_required, current_user
 from app.main import main_bp
 from app.models.user import User
 from app.models.study_group import StudyGroup
+from app.models.membership_requests import GroupJoinRequest
 from app.extensions import db
 import requests
 
@@ -60,6 +61,24 @@ def create_group():
         flash(f"An error has occured: {str(e)}", "error")
     
     return redirect(url_for('main.my_groups'))
+
+@main_bp.route('/inbox')
+@login_required
+def inbox():
+
+    # get all requests for groups user owns
+    group_requests = GroupJoinRequest.query.filter(
+        GroupJoinRequest.group_id.in_(
+            StudyGroup.query.with_entities(StudyGroup.id).filter_by(owner_id=current_user.id)
+        ),
+        GroupJoinRequest.status == 'pending'
+    ).all()
+
+    # get all pending requests for user
+    user_requests = GroupJoinRequest.query.filter_by(user_id=current_user.id).all()
+
+    return render_template('inbox.html', group_requests=group_requests, user_requests=user_requests)
+
 
 @main_bp.route("/find-groups")
 @login_required
@@ -118,6 +137,46 @@ def join_group():
         flash(f"An error occured: {str(e)}", "danger")
     
     return redirect(url_for('main.find_groups'))
+
+
+@main_bp.route("/group-request", methods=['POST'])
+@login_required
+def group_request():
+    group_id = request.form.get("group_id")
+
+    if not group_id:
+        flash("Invalid Group ID.", 'danger')
+        return redirect(url_for('main.find_groups'))
+    
+    # Check if group exists
+    group = StudyGroup.query.filter_by(id=group_id).first()
+    if not group:
+        flash("Study group not found!", "danger")
+        return redirect(url_for('main.find_groups'))
+    
+    # check if user is already in group
+    if current_user in group.members:
+        flash("You are already a member of this group.", "danger")
+        return redirect(url_for('main.find_groups'))
+    
+    # check if user already has a pending request
+    group_request = GroupJoinRequest.query.filter(
+        GroupJoinRequest.user_id == current_user.id,
+        GroupJoinRequest.group_id == group.id,
+        GroupJoinRequest.status == 'pending'
+    ).first()
+    if group_request:
+        flash("You already have a pending request for this group.", "info")
+        return redirect(url_for('main.find_groups'))
+
+    # create request for group in table
+    new_request = GroupJoinRequest(user_id=current_user.id, group_id=group_id)
+    db.session.add(new_request)
+    db.session.commit()
+
+    flash(f"You have requested to join { group.name }!", "info")
+    return redirect(url_for('main.find_groups'))
+    
 
 @main_bp.route("/group/<group_id>", methods=['GET'])
 @login_required

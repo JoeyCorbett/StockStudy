@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Inbox - StockStudy
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">Inbox</h1>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mb-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <h3 class="fw-bold mb-3">Pending Requests (Your Groups)</h3>
+            {% if group_requests %}
+                <ul class="list-group">
+                    {% for request in group_requests %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ request.user.name }}</strong> wants to join 
+                                <strong>{{ request.group.name }}</strong>.
+                                <br>
+                                <small class="text-muted">Requested on {{ request.created_at.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <form method="POST" action="#">
+                                    <button class="btn btn-success btn-sm">Approve</button>
+                                </form>
+                                <form method="POST" action="#">
+                                    <button class="btn btn-danger btn-sm">Reject</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No pending requests for your groups.</p>
+            {% endif %}
+        </div>
+
+        <div class="col-12 col-md-6">
+            <h3 class="fw-bold mb-3">Your Requests</h3>
+            {% if user_requests %}
+                <ul class="list-group">
+                    {% for request in user_requests %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ request.group.name }}</strong>
+                                <br>
+                                <small>Status: <span class="text-capitalize">{{ request.status }}</span></small>
+                                <br>
+                                <small class="text-muted">Requested on {{ request.created_at.strftime('%Y-%m-%d') }}</small>
+                            </div>
+                            {% if request.status == 'pending' %}
+                                <form method="POST" action="#">
+                                    <button class="btn btn-outline-secondary btn-sm">Cancel</button>
+                                </form>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">You haven't requested to join any groups.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
