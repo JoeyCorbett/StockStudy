@@ -19,7 +19,7 @@ class GroupJoinRequest(db.Model):
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
         server_default=db.func.now(),
-        comment="Timestamp when the request was creted"
+        comment="Timestamp when the request was created"
     )
 
     user = db.relationship('User', backref='join_requests', lazy=True)

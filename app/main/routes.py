@@ -5,6 +5,7 @@ from app.main import main_bp
 from app.models.user import User
 from app.models.study_group import StudyGroup
 from app.models.membership_requests import GroupJoinRequest
+from app.main.utils import get_request
 from app.extensions import db
 import requests
 
@@ -65,7 +66,6 @@ def create_group():
 @main_bp.route('/inbox')
 @login_required
 def inbox():
-
     # get all requests for groups user owns
     group_requests = GroupJoinRequest.query.filter(
         GroupJoinRequest.group_id.in_(
@@ -75,10 +75,73 @@ def inbox():
     ).all()
 
     # get all pending requests for user
-    user_requests = GroupJoinRequest.query.filter_by(user_id=current_user.id).all()
+    user_requests = GroupJoinRequest.query.filter_by(user_id=current_user.id, status='pending').all()
 
     return render_template('inbox.html', group_requests=group_requests, user_requests=user_requests)
 
+@main_bp.route('/accept-request/<int:request_id>/<int:group_id>', methods=['POST'])
+@login_required
+def accept_request(request_id, group_id):
+    # make sure request exists / is valid
+    group_request = get_request(request_id, group_id)
+    if group_request is None:
+        flash("Unauthorized or invalid request", "danger")
+        return redirect(url_for('main.inbox'))
+
+    # verify current user is owner of group 
+    group = StudyGroup.query.get(group_request.group_id)
+    if current_user.id != group.owner_id:
+        flash("You are not the owner of this group", "danger")
+        return redirect(url_for('main.inbox'))
+    
+    # Query user requesting to join
+    user = User.query.get(group_request.user_id)
+
+    GroupJoinRequest.approve(group_request)
+    group.members.append(user)
+    group.current_members += 1
+    db.session.commit()
+
+    flash(f"You have accepted {user.name}'s request to join {group.name}!", "info")
+    return redirect(url_for('main.inbox'))
+
+@main_bp.route('/reject-request/<int:request_id>/<int:group_id>', methods=['POST'])
+@login_required
+def reject_request(request_id, group_id):
+    # Make sure request exists / is valid
+    group_request = get_request(request_id, group_id)
+    if group_request is None:
+        flash("Unauthorized or invalid request", "danger")
+        return redirect(url_for('main.inbox'))
+    
+    # verify current user is owner of group 
+    group = StudyGroup.query.get(group_request.group_id)
+    if current_user.id != group.owner_id:
+        flash("You are not the owner of this group", "danger")
+        return redirect(url_for('main.inbox'))
+    
+    user = User.query.get(group_request.user_id)
+    
+    GroupJoinRequest.reject(group_request)
+    db.session.commit()
+
+    flash(f"You have rejected {user.name}'s request to join {group.name}", "info")
+    return redirect(url_for('main.inbox'))
+
+@main_bp.route('/cancel-request/<request_id>', methods=["POST"])
+@login_required
+def cancel_request(request_id):
+    # Check if request exists
+    group_request = GroupJoinRequest.query.get(request_id)
+    if not group_request:
+        flash("Unauthorized or invalid request", "danger")
+        return redirect(url_for('main.inbox'))
+    
+    db.session.delete(group_request)
+    db.session.commit()
+    flash("Request canceled.", "info")
+    return redirect(url_for('main.inbox'))
+    
 
 @main_bp.route("/find-groups")
 @login_required

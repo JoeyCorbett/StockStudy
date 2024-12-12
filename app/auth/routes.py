@@ -269,9 +269,11 @@ def reset_password():
             flash("Please use a valid Stockton Email address.", "danger")
             return redirect(url_for('auth.reset_password'))
         
-        
         user = User.query.filter_by(email=email).first()
-        if user.is_google_user == 0:
+
+        if user is None:
+            time.sleep(2.92)
+        elif user.is_google_user == 0:
             send_reset_email_limit(user.email)
         else:
             # Fake load time to prevent email enumeration
