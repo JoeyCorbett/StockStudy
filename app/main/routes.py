@@ -8,6 +8,8 @@ from app.models.membership_requests import GroupJoinRequest
 from app.main.utils import get_request
 from app.extensions import db
 import requests
+from sqlalchemy import or_
+from sqlalchemy.orm import aliased
 
 GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY')
 
@@ -159,6 +161,22 @@ def find_groups():
         subjects.append(group.subject)
     
     return render_template('find-groups.html', study_groups=filtered_groups, subjects=subjects)
+
+@main_bp.route('/search-groups')
+def search_groups():
+    query = request.args.get('q', '').lower()
+
+    owner_alias = aliased(User)
+
+    filtered_groups = db.session.query(StudyGroup).join(owner_alias, StudyGroup.owner).filter(
+        or_(
+            StudyGroup.name.ilike(f"%{query}%"),
+            StudyGroup.description.ilike(f"%{query}%"),
+            owner_alias.name.ilike(f"%{query}%")
+        )
+    ).all()
+    
+    return render_template('find-groups.html', study_groups=filtered_groups)
 
 @main_bp.route("/profile")
 @login_required
