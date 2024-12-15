@@ -299,6 +299,66 @@ def manage_group(group_id):
      
     return render_template("manage-group.html", group=group, members=group.members, user=current_user, group_id=group_id)
 
+@main_bp.route("/edit-group/<int:group_id>", methods=['POST'])
+@login_required
+def edit_group(group_id):
+    if not group_id:
+        flash("Invalid Group ID", "danger")
+        return redirect(url_for('main.my_groups'))
+    
+    if not isinstance(group_id, int):
+        flash("Invalid Group ID format." "danger")
+        return redirect('main.my_groups')
+    
+    # check if group exists
+    group = StudyGroup.query.filter_by(id=group_id).first()
+    if not group:
+        flash("Study group not found!", "danger")
+        return redirect(url_for('main.my_groups'))
+    
+    # Check if user is owner of group
+    if group.owner_id != current_user.id:
+        flash("You are not the owner of this group.", "danger")
+        return redirect(url_for('main.my_groups'))
+    
+    name = request.form.get("name")
+    subject = request.form.get("subject")
+    description = request.form.get("description")
+    location = request.form.get("location")
+
+    # Validate input
+    if name and len(name) > 100:
+        flash("Group name must not exceed 100 characters." "danger")
+        return redirect(url_for('main.edit_group', group_id=group_id))
+    
+    fields_to_update = {
+        'name': name,
+        'subject': subject,
+        'description': description,
+        'location': location
+    }
+
+    updated_fields = []
+
+    for field, new_value in fields_to_update.items():
+        current_value = getattr(group, field)
+        if new_value and new_value != current_value:
+            setattr(group, field, new_value)
+            updated_fields.append(field)
+
+    try:
+        db.session.commit()
+        if updated_fields:
+            flash("Group updated successfully!", "success")
+        else:
+            flash("No changes were made.", "info")
+    except Exception as e:
+        db.session.rollback()
+        flash("An unexpected error occurred. Please try again later.", "danger")
+
+    return redirect(url_for('main.manage_group', group_id=group_id))
+    
+
 @main_bp.route("/remove-member/<group_id>/<member_id>", methods=['POST'])
 @login_required
 def remove_member(group_id, member_id):

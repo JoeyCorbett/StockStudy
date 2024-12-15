@@ -27,7 +27,7 @@
                 </p>
             </div>
             <div class="ms-auto d-flex align-items-center gap-3">
-                <button class="btn btn-primary btn-sm">Edit Group</button>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editGroupModal">Edit Group</button>
                 <span class="badge bg-secondary py-2 px-3">Members: {{ group.current_members }}</span>
             </div>
         </div>
@@ -80,6 +80,43 @@
         </div>
     </div>
 </div>
+
+<!-- Edit Group Form Modal -->
+<div class="modal fade" id="editGroupModal" tabindex="-1" aria-labelledby="editGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editGroupModalLabel">Edit Group</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editGroupForm" method="POST" action="{{ url_for('main.edit_group', group_id=group_id) }}">
+                    <div class="mb-3">
+                        <label for="groupName" class="form-label">Group Name</label>
+                        <input type="text" class="form-control" id="groupName" name="name" value="{{ group.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="groupSubject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="groupSubject" name="subject" value="{{ group.subject }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="groupDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="groupDescription" name="description" rows="3" required>{{ group.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="groupLocation" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="groupLocation" name="location" value="{{ group.location }}" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- Group Deletion Confirmation Modal -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
