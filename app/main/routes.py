@@ -10,6 +10,7 @@ from app.extensions import db
 import requests
 from sqlalchemy import or_
 from sqlalchemy.orm import aliased
+from app.utils import is_valid_password
 
 GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY')
 
@@ -227,7 +228,40 @@ def edit_profile():
 
 
     return redirect(url_for('main.profile'))
+
+@main_bp.route('/change-password', methods=['POST'])
+@login_required
+def change_password():
+    if current_user.is_google_user == 1:
+        flash("You are registered with Google SSO and must change you're password through their services", "danger")
+        return redirect(url_for('main.profile'))
+
+    current_password = request.form.get("current-password")
+    new_password = request.form.get("new-password")
+    new_confirm_password = request.form.get("new-confirm-password")
+
+    if not current_password or not new_password or not new_confirm_password:
+        flash("All fields are required", "danger")
+        return redirect(url_for('main.profile'))
     
+    if not current_user.check_password(current_password):
+        flash("Current password is incorrect", "danger")
+        return redirect(url_for('main.profile'))
+    
+    if new_password != new_confirm_password:
+        flash("New password and confirm password don't match", "danger")
+        return redirect(url_for('main.profile'))
+    
+    if not is_valid_password(new_password):
+            flash("Password must be at least 8 characters long and include one letter, one number, and one special character.", "danger")
+            return redirect(url_for('main.profile'))
+    
+    current_user.set_password(new_password)
+    db.session.commit()
+
+    flash("Password updated successfully.", "success")
+    return redirect(url_for('main.profile'))
+
 
 @main_bp.route("/map")
 @login_required

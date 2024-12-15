@@ -61,11 +61,13 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="mb-2">
-                    <button class="btn btn-outline-primary w-100 py-2">Change Password</button>
+            {% if user.is_google_user != 1 %}
+                <div class="row">
+                    <div class="mb-2">
+                        <button class="btn btn-outline-primary w-100 py-2" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</button>
+                    </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -102,6 +104,37 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Form Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('main.change_password')}}">
+                    <div class="mb-3">
+                        <label for="currnet-password" class="form-label">Current Password</label>
+                        <input type="password" name="current-password" class="form-control" id="current-password" placeholder="Enter new current here" autocomplete="current-password" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new-password" class="form-label">New Password</label>
+                        <input type="password" name="new-password" class="form-control" id="new-password" placeholder="Enter new password here" autocomplete="new-password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new-confirm-password" class="form-label">Confirm your password</label>
+                        <input type="password" name="new-confirm-password" class="form-control" id="new-confirm-password" placeholder="Enter new password (again)" required autocomplete="new-password">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary w-100">Continue</button>
                     </div>
                 </form>
             </div>
