@@ -184,6 +184,51 @@ def profile():
     user = current_user
     return render_template('profile.html', user=user)
 
+@main_bp.route("/edit-profile", methods=['POST'])
+@login_required
+def edit_profile():
+    bio = request.form.get("bio")
+    major = request.form.get("major")
+    year = request.form.get("year")
+
+    enums = ['FRESHMAN', 'SOPHOMORE', 'JUNIOR', 'SENIOR', 'GRADUATE']
+
+    print(year)
+    print(year.upper())
+
+    if year.upper() not in enums and year != 'NULL':
+        flash("Invalid year selected.", "danger")
+        return redirect(url_for('main.profile'))
+
+    fields_to_update = {
+        'bio': bio,
+        'major': major,
+        'year': year.upper(),
+    }
+
+    updated_fields = []
+
+    for field, new_value in fields_to_update.items():
+        current_value = getattr(current_user, field)
+        if new_value and new_value != current_value:
+            setattr(current_user, field, new_value)
+            updated_fields.append(field)
+
+    try:
+        db.session.commit()
+        if updated_fields:
+            flash("Profile updated successfully!", "success")
+        else:
+            flash("No changes were made.", "info")
+    except Exception as e:
+        db.session.rollback()
+        flash("An unexpected error occurred. Please try again later.", "danger")
+        return redirect(url_for('main.profile'))
+
+
+    return redirect(url_for('main.profile'))
+    
+
 @main_bp.route("/map")
 @login_required
 def map():

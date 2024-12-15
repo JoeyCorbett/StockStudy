@@ -1,6 +1,8 @@
 from app.extensions import db, bcrypt
 from datetime import datetime, timezone
 from flask_login import UserMixin
+from sqlalchemy import Enum
+from enum import Enum as PyEnum
 
 
 user_groups = db.Table(
@@ -9,12 +11,22 @@ user_groups = db.Table(
     db.Column('study_group_id', db.Integer, db.ForeignKey('study_groups.id'), primary_key=True)
 )
 
+class YearEnum(PyEnum):
+    FRESHMAN = "Freshman"
+    SOPHOMORE = "Sophomore"
+    JUNIOR = "Junior"
+    SENIOR = "Senior"
+    GRADUATE = "Graduate"
+
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    bio = db.Column(db.String(500), nullable=True)
+    major = db.Column(db.String(100), nullable=True)
+    year = db.Column(Enum(YearEnum, nullable=True))
     password_hash = db.Column(db.String(255), nullable=True)
     google_id = db.Column(db.String(255), unique=True, nullable=True)
     is_google_user = db.Column(db.Boolean, default=False, nullable=False)
