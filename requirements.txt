@@ -17,3 +17,4 @@ itsdangerous==2.2.0
 blinker==1.8.2 
 flask-migrate==4.0.7
 gunicorn==23.0.0
+psycopg2-binary==2.9.10

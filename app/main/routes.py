@@ -194,9 +194,6 @@ def edit_profile():
 
     enums = ['FRESHMAN', 'SOPHOMORE', 'JUNIOR', 'SENIOR', 'GRADUATE']
 
-    print(year)
-    print(year.upper())
-
     if year.upper() not in enums and year != 'NULL':
         flash("Invalid year selected.", "danger")
         return redirect(url_for('main.profile'))
@@ -214,6 +211,7 @@ def edit_profile():
         if new_value and new_value != current_value:
             setattr(current_user, field, new_value)
             updated_fields.append(field)
+
 
     try:
         db.session.commit()
