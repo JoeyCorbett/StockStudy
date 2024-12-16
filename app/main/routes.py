@@ -499,6 +499,12 @@ def leave_group(group_id):
 @login_required
 def delete_group(group_id):
     group = StudyGroup.query.get(group_id)
+    
+    # Check if group exists 
+    if group == None:
+        flash("This group doesn't exist", "danger")
+        return redirect(url_for('main.my_groups'))
+
     if current_user.id != group.owner_id:
         flash("You do not have permission to delete this group", "danger")
         return redirect(url_for('main.my_groups'))
