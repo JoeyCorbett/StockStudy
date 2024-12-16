@@ -5,12 +5,13 @@
 <img width="1800" alt="Screenshot 2024-12-15 at 5 59 27 PM" src="https://github.com/user-attachments/assets/b3292ecb-c453-43b1-8e64-fc0f643e53d2" />
 
 
-#### Video Demo: https://youtu.be/RvGMq054zk4
+#### Video Demo: [Here](https://youtu.be/RvGMq054zk4)
+#### Live Demo: [StockStudy](https://stockstudy-0eeb5b975b5a.herokuapp.com/) (Requires Stockton Email to register)
 
 
 ## Tech Stack 💻
 * **Flask**
-* **SQLite**
+* **PostgreSQL**
 * **Bootstrap**
 * **Javascript**
 
