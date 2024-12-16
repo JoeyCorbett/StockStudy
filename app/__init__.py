@@ -16,7 +16,11 @@ load_dotenv()
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///StockStudy.db')
+    db_url = os.getenv('DATABASE_URL', 'sqlite:///StockStudy.db')
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
   #  app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
 
