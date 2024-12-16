@@ -3,6 +3,7 @@ from flask import Flask, render_template
 from datetime import timedelta
 from dotenv import load_dotenv
 from app.extensions import db, migrate, bcrypt, login_manager, mail, limiter, oauth
+from flask_migrate import upgrade
 from app.auth import auth_bp
 from app.main import main_bp
 from app.models.user import User
@@ -51,6 +52,12 @@ def create_app():
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('404.html'), 404
+    
+    with app.app_context():
+        try:
+            upgrade()
+        except Exception as e:
+            print(f"Database upgrade failed: {e}")
 
 
     return app
