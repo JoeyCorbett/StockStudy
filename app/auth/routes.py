@@ -273,6 +273,7 @@ def reset_password():
         if user is None:
             time.sleep(2.92)
         elif user.is_google_user == 0:
+            print(f"Email sent to --> {user}")
             send_reset_email_limit(user.email)
         else:
             # Fake load time to prevent email enumeration
@@ -317,9 +318,10 @@ def resend_reset():
         return redirect(url_for('auth.reset_password'))
     
     user = User.query.filter_by(email=email).first()
-    if not user:
+    if not user or user.is_google_user == 1:
         time.sleep(2.75)
     else:
+        print(f"Email sent to --> {user}")
         send_reset_email_limit(user.email)
 
     flash(f"If {email} is an email on file, we have sent an email to help you reset your password.", "success")
