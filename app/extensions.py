@@ -23,7 +23,7 @@ def get_forwarded_ip():
     return request.remote_addr 
 
 if os.getenv("FLASK_ENV") == "production":
-    STORAGE_URI = os.getenv("REDIS_URL")
+    STORAGE_URI = os.getenv("REDISCLOUD_URL")
 else:
     STORAGE_URI = "memory://"
 
