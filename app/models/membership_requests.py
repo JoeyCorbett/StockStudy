@@ -23,7 +23,7 @@ class GroupJoinRequest(db.Model):
     )
 
     user = db.relationship('User', backref='join_requests', lazy=True)
-    group = db.relationship('StudyGroup', backref='join_requests', lazy=True)
+    group = db.relationship('StudyGroup', back_populates='membership_requests')
 
     def approve(self):
         """Approve the join request."""

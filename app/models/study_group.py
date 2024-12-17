@@ -27,7 +27,7 @@ class StudyGroup(db.Model):
       )
     membership_requests = db.relationship(
         'GroupJoinRequest',
-        backref='study_group',
+        back_populates='group',
         cascade='all, delete-orphan'
     )
 
