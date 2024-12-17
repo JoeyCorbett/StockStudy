@@ -5,8 +5,8 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail
 from flask_login import LoginManager
 from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 from authlib.integrations.flask_client import OAuth
+from flask import request
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -14,10 +14,18 @@ migrate = Migrate()
 bcrypt = Bcrypt()
 login_manager = LoginManager()
 mail = Mail()
+
+# Manually extracts client's real IP
+def get_forwarded_ip():
+    forwarded_for = request.headers.get("X-Forwarded-For", None)
+    if forwarded_for:
+        return forwarded_for.split(",")[0]
+    return request.remote_addr 
+
 limiter = Limiter(
-    key_func=get_remote_address,
+    key_func=get_forwarded_ip,
     default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://",
+    storage_uri="memory://"
 )
 
 oauth = OAuth()

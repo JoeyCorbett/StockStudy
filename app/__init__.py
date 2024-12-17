@@ -22,7 +22,6 @@ def create_app():
 
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-  #  app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
 
     # Initialize Flask-Limiter
     limiter.init_app(app)

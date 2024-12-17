@@ -26,18 +26,17 @@ def rate_limit_exceeded(e):
     flash("Your have exceeded the allowed number of email requests. Please wait and try again", "danger")
     return redirect(url_for('auth.login', email=email))
 
-@limiter.limit("2 per minute; 5 per hour")
+@limiter.limit("3 per minute; 10 per hour")
 def send_verification_email_limit(email):
     token = generate_verification_token(email)
     verification_url = url_for('auth.verify_email', token=token, _external=True)
     send_verification_email(mail, email, verification_url)
 
-@limiter.limit("2 per minute; 5 per hour")
+@limiter.limit("3 per minute; 10 per hour")
 def send_reset_email_limit(email):
     token = generate_reset_email(email)
     reset_url = url_for('auth.reset_email', token=token, _external=True)
     send_reset_email(mail, email, reset_url)
-
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
@@ -304,7 +303,6 @@ def reset_email(token):
         flash("The reset link is invalid or has expired.", "danger")
         return redirect(url_for('auth.login'))
     
-    #session.permanent = True
     session.pop("reset_email", None)
     session['reset_verified_email'] = email
 
