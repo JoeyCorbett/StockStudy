@@ -22,10 +22,15 @@ def get_forwarded_ip():
         return forwarded_for.split(",")[0]
     return request.remote_addr 
 
+if os.getenv("FLASK_ENV") == "production":
+    STORAGE_URI = os.getenv("REDIS_URL")
+else:
+    STORAGE_URI = "memory://"
+
 limiter = Limiter(
     key_func=get_forwarded_ip,
     default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://"
+    storage_uri=STORAGE_URI
 )
 
 oauth = OAuth()
