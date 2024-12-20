@@ -2,6 +2,7 @@ import os
 import re
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
+from datetime import datetime, timezone, timedelta
 
 def is_valid_email(email):
     email_regex = r"^[a-zA-Z0-9._%+-]+@go\.stockton\.edu$"
@@ -17,25 +18,29 @@ def is_valid_password(password):
 
 def generate_verification_token(email):
     serializer = URLSafeTimedSerializer(os.getenv('SECRET_KEY'))
-    return serializer.dumps(email, salt='email-confirmation-salt')
+    token =  serializer.dumps(email, salt='email-confirmation-salt')
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+    return token, expires_at
 
 def generate_reset_email(email):
     serializer = URLSafeTimedSerializer(os.getenv('SECRET_KEY'))
-    return serializer.dumps(email, salt='password-reset-salt')
+    token =  serializer.dumps(email, salt='password-reset-salt')
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+    return token, expires_at
 
 
-def confirm_verification_token(token, expiration=3600):
+def confirm_verification_token(token):
     serializer = URLSafeTimedSerializer(os.getenv('SECRET_KEY'))
     try:
-        email = serializer.loads(token, salt='email-confirmation-salt', max_age=expiration)
+        email = serializer.loads(token, salt='email-confirmation-salt')
         return email
     except: 
         return None
     
-def confirm_reset_token(token, expiration=600):
+def confirm_reset_token(token):
     serializer = URLSafeTimedSerializer(os.getenv('SECRET_KEY'))
     try:
-        email = serializer.loads(token, salt='password-reset-salt', max_age=expiration)
+        email = serializer.loads(token, salt='password-reset-salt')
         return email
     except: 
         return None

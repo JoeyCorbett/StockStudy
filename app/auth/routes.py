@@ -15,7 +15,10 @@ from app.utils import (
     send_reset_email,
 )
 from app.models.user import User
+from app.models.email_verification_tokens import EmailVerificationToken
+from app.models.password_reset_tokens import PasswordResetToken
 from app.auth import auth_bp
+from datetime import datetime, timezone
 
 
 # Rate limit error handler
@@ -28,13 +31,21 @@ def rate_limit_exceeded(e):
 
 @limiter.limit("3 per minute; 10 per hour")
 def send_verification_email_limit(email):
-    token = generate_verification_token(email)
+    token, expires_at = generate_verification_token(email)
+    verification_token = EmailVerificationToken(email=email, token=token, expires_at=expires_at)
+    db.session.add(verification_token)
+    db.session.commit()
+
     verification_url = url_for('auth.verify_email', token=token, _external=True)
     send_verification_email(mail, email, verification_url)
 
 @limiter.limit("3 per minute; 10 per hour")
 def send_reset_email_limit(email):
-    token = generate_reset_email(email)
+    token, expires_at = generate_reset_email(email)
+    reset_token = PasswordResetToken(email=email, token=token, expires_at=expires_at)
+    db.session.add(reset_token)
+    db.session.commit()
+
     reset_url = url_for('auth.reset_email', token=token, _external=True)
     send_reset_email(mail, email, reset_url)
 
@@ -76,7 +87,7 @@ def login():
                 return redirect(url_for('auth.login'))
         
         if not user.is_verified:
-            session["email"] = user.email
+            session["reg_email"] = user.email
             send_verification_email_limit(user.email)
             return redirect(url_for('auth.verify_page'))
 
@@ -202,37 +213,41 @@ def register():
 def verify_page():
     email = session.get("reg_email")
     if not email:
-        flash("Session expired or no email found.", "danger")
+        flash("Session expired", "danger")
         return redirect(url_for('auth.login'))
     
     return render_template('verify.html', email=email)
 
 @auth_bp.route("/verify-email/<token>")
 def verify_email(token):
-    email = confirm_verification_token(token)
+    verification_token = EmailVerificationToken.query.filter_by(token=token).first()
 
-    # Clear Session
-    session.pop('reg_email', None)
-
-    # Confirm token
-    if not email:
-        flash("The verification link is invalid or has expired", "danger")
+    if not verification_token:
+        flash("The verification link is invalid.", "danger")
         return redirect(url_for('auth.login'))
     
+    if datetime.now(timezone.utc) > verification_token.get_expires_at():
+        db.session.delete(verification_token)
+        db.session.commit()
+        flash("The verification link has expired. Please request a new one.", "danger")
+        return redirect(url_for('auth.login'))
+
     # Find user in database
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(email=verification_token.email).first()
     if not user:
         flash("User not found.", "danger")
         return redirect(url_for('auth.register'))
     
-    if user.is_verified:
-        flash("Your email is already verified", "info")
-        return redirect(url_for('auth.login'))
-    
     user.is_verified = True
     db.session.commit()
 
-    flash("Your email has been verified! You can now log in", "success")
+    # Clean up token
+    db.session.delete(verification_token)
+    db.session.commit()
+
+    session.pop('reg_email', None)
+
+    flash("Your email has been verified! You can now log in.", "success")
     return redirect(url_for('auth.login'))
 
 @auth_bp.route("/resend-verification", methods=['POST'])
@@ -295,17 +310,27 @@ def check_email():
     
     return render_template('check-email.html', email=email)
 
+
 @auth_bp.route("/reset-email/<token>")
 def reset_email(token):
-    email = confirm_reset_token(token)
+    reset_token = PasswordResetToken.query.filter_by(token=token).first()
 
     # Confirm token
-    if not email:
+    if not reset_token:
         flash("The reset link is invalid or has expired.", "danger")
-        return redirect(url_for('auth.login'))
+        return redirect(url_for('auth.reset_password'))
     
+    if datetime.now(timezone.utc) > reset_token.get_expires_at():
+        db.session.delete(reset_token)
+        db.session.commit()
+        flash("This reset link has expired. Please request a new one.", "danger")
+        return redirect(url_for('auth.reset_password'))
+
+    db.session.delete(reset_token)
+    db.session.commit()
+
     session.pop("reset_email", None)
-    session['reset_verified_email'] = email
+    session['reset_verified_email'] = reset_token.email
 
     return redirect(url_for('auth.change_password'))
 

@@ -16,6 +16,11 @@ load_dotenv()
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['PERMANENENT_SESSION_LIFETIME'] = timedelta(hours=1)
+    
     db_url = os.getenv('DATABASE_URL', 'sqlite:///StockStudy.db')
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
