@@ -57,7 +57,7 @@
                     </div>
                     <div class="mb-3">
                         <h5 class="fw-bold">Year of Study</h5>
-                        <p class="text-muted">{{ user.year.value or 'Not specified.' }}</p>
+                        <p class="text-muted">{{ user.year or 'Not specified.' }}</p>
                     </div>
                 </div>
             </div>
@@ -93,9 +93,9 @@
                     <div class="mb-3">
                         <label for="userYear" class="form-label">Year of Study</label>
                         <select id="userYear" class="form-select" name="year" required>
-                            <option value="{{ user.year.value }}" selected>{{ user.year.value or 'Select Year' }}</option>
+                            <option value="{{ user.year }}" selected>{{ user.year or 'Select Year' }}</option>
                             {% for year in ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate'] %}
-                                {% if year != user.year.value %}
+                                {% if year != user.year %}
                                     <option value="{{ year }}">{{ year }}</option>
                                 {% endif %}
                             {% endfor %}

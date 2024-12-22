@@ -192,26 +192,30 @@ def edit_profile():
     major = request.form.get("major")
     year = request.form.get("year")
 
-    enums = ['FRESHMAN', 'SOPHOMORE', 'JUNIOR', 'SENIOR', 'GRADUATE']
+    VALID_YEARS = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate']
 
-    if year.upper() not in enums and year != 'NULL':
+    if year not in VALID_YEARS:
         flash("Invalid year selected.", "danger")
         return redirect(url_for('main.profile'))
 
     fields_to_update = {
         'bio': bio,
         'major': major,
-        'year': year.upper(),
+        'year': year,
     }
 
     updated_fields = []
+
+    print(f"To Update: {fields_to_update}")
 
     for field, new_value in fields_to_update.items():
         current_value = getattr(current_user, field)
         if new_value and new_value != current_value:
             setattr(current_user, field, new_value)
+            print(f"({current_user.name}):  {field}: {new_value}")
             updated_fields.append(field)
 
+    print(f"Updated: {updated_fields}")
 
     try:
         db.session.commit()
@@ -221,6 +225,7 @@ def edit_profile():
             flash("No changes were made.", "info")
     except Exception as e:
         db.session.rollback()
+        print(f"Profile Update Error: {e}")
         flash("An unexpected error occurred. Please try again later.", "danger")
         return redirect(url_for('main.profile'))
 
