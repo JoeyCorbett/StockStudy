@@ -13,6 +13,7 @@ from sqlalchemy.orm import aliased
 from app.utils import is_valid_password
 
 GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY')
+MAPBOX_ACCESS_KEY = os.getenv('MAPBOX_ACCESS_KEY')
 
 @main_bp.route('/')
 def landing():
@@ -269,7 +270,7 @@ def change_password():
 @main_bp.route("/map")
 @login_required
 def map():
-    return render_template('map.html')
+    return render_template('map.html', ACCESS_KEY=MAPBOX_ACCESS_KEY)
 
 @main_bp.route("/join-group", methods=['POST'])
 @login_required
