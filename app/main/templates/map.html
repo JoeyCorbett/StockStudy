@@ -30,6 +30,24 @@
                 map.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
                 map.setConfigProperty('basemap', 'showTransitLabels', false);
                 map.setConfigProperty('basemap', 'lightPreset', 'dusk');
+
+                map.addSource('stockton_data', {
+                    'type': 'vector',
+                    'url': 'mapbox://tylermong.cm51s1jh72g4v1up8msmajkpe-22trh'
+                });
+                
+                map.addLayer({
+                    'id': 'my-tileset-layer',
+                    'type': 'circle',
+                    'source': 'stockton_data',
+                    'source-layer': 'StockStudy',
+                    'layout': {},
+                    'paint': {
+                        'circle-color': '#7F3121',
+                        'circle-opacity': 0.75,
+                        'circle-radius': 5
+                    }
+                });
             });
         </script>
     </body>
