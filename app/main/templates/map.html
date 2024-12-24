@@ -20,7 +20,16 @@
             const map = new mapboxgl.Map({
                 container: 'map',
                 center: [-74.531132, 39.492082],
-                zoom: 16
+                zoom: 16,
+                lightPreset: 'dusk',
+            });
+
+            map.on('style.load', () => {
+                map.setConfigProperty('basemap', 'showPlaceLabels', false);
+                map.setConfigProperty('basemap', 'showRoadLabels', false);
+                map.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
+                map.setConfigProperty('basemap', 'showTransitLabels', false);
+                map.setConfigProperty('basemap', 'lightPreset', 'dusk');
             });
         </script>
     </body>
