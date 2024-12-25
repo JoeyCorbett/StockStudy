@@ -5,69 +5,77 @@
 {% endblock %}
 
 {% block content %}
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-    <div class="container mb-3">
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
-{% endwith %}
-
 <div class="container my-5">
-    <div class="card shadow-sm rounded">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h2 class="mb-0 fw-bold">Your Profile</h2>
-            <button class="btn btn-outline-primary py-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</button>
-        </div>
-        <div class="card-body">
-            <div class="row mb-4">
-                <div class="col-md-4 text-center">
-                    <div class="d-flex flex-column align-items-center">
-                        <img 
-                            src="{{ user.profile_picture or url_for('static', filename='images/default-profile.png') }}" 
-                            alt="Profile Picture" 
-                            class="img-fluid rounded-circle mb-3"
-                            style="width: 150px; height: 150px; object-fit: cover;"
-                        >
-                        <button class="btn btn-outline-secondary btn-sm">Change Picture</button>
-                    </div>
-                </div>
-                <div class="col-md-8">
-                    <div class="mb-3">
-                        <h5 class="fw-bold">Name</h5>
-                        <p class="text-muted">{{ user.name }}</p>
-                    </div> 
-                    <div class="mb-3">
-                        <h5 class="fw-bold">Email</h5>
-                        <p class="text-muted">{{ user.email }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <h5 class="fw-bold">Bio</h5>
-                        <p class="text-muted">{{ user.bio or 'No bio available.' }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <h5 class="fw-bold">Major</h5>
-                        <p class="text-muted">{{ user.major or 'Not set.' }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <h5 class="fw-bold">Year of Study</h5>
-                        <p class="text-muted">{{ user.year or 'Not specified.' }}</p>
-                    </div>
-                </div>
-            </div>
-            {% if user.is_google_user != 1 %}
-                <div class="row">
-                    <div class="mb-2">
-                        <button class="btn btn-outline-primary w-100 py-2" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</button>
-                    </div>
+
+    <div class="custom-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container mb-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
                 </div>
             {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="custom-container row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border rounded">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">Profile Details</h3>
+                    <button class="btn btn-outline-primary py-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</button>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4 text-center">
+                            <div class="d-flex flex-column align-items-center">
+                                <img 
+                                    src="{{ user.profile_picture or url_for('static', filename='images/default-profile.png') }}" 
+                                    alt="Profile Picture" 
+                                    class="img-fluid rounded-circle mb-3"
+                                    style="width: 150px; height: 150px; object-fit: cover;"
+                                >
+                                <button class="btn btn-outline-secondary btn-sm mt-2">Change Picture</button>
+                            </div>
+                        </div>
+                    
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <h5 class="fw-bold">Name</h5>
+                                <p class="text-muted">{{ user.name }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="fw-bold">Email</h5>
+                                <p class="text-muted">{{ user.email }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="fw-bold">Bio</h5>
+                                <p class="text-muted">{{ user.bio or 'No bio available.' }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="fw-bold">Major</h5>
+                                <p class="text-muted">{{ user.major or 'Not set.' }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <h5 class="fw-bold">Year of Study</h5>
+                                <p class="text-muted">{{ user.year or 'Not specified.' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if not user.is_google_user %}
+                        <div class="row">
+                            <div class="mb-2">
+                                <button class="btn btn-outline-primary w-100 py-2" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</button>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
