@@ -1,16 +1,18 @@
 import os
-from flask import render_template, request, flash, redirect, url_for
+from flask import render_template, request, flash, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from app.main import main_bp
-from app.models.user import User
+from app.models.user import User, user_groups
 from app.models.study_group import StudyGroup
 from app.models.membership_requests import GroupJoinRequest
-from app.main.utils import get_request
+from app.models.group_invites import GroupInvites
+from app.main.utils import get_request, validate_invite
 from app.extensions import db
 import requests
 from sqlalchemy import or_
 from sqlalchemy.orm import aliased
 from app.utils import is_valid_password
+from sqlalchemy.sql import exists
 
 GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY')
 
@@ -78,9 +80,23 @@ def inbox():
     ).all()
 
     # get all pending requests for user
-    user_requests = GroupJoinRequest.query.filter_by(user_id=current_user.id, status='pending').all()
+    user_requests = GroupJoinRequest.query.filter_by(
+        user_id=current_user.id, 
+        status='pending'
+    ).all()
 
-    return render_template('inbox.html', group_requests=group_requests, user_requests=user_requests)
+    # get all group invites for user
+    incoming_invites = GroupInvites.query.filter_by(
+        invitee_id=current_user.id,
+        status='pending'
+    ).all()
+
+    outgoing_invites = GroupInvites.query.filter_by(
+        inviter_id=current_user.id,
+        status='pending'
+    ).all()
+
+    return render_template('inbox.html', group_requests=group_requests, user_requests=user_requests, incoming_invites=incoming_invites, outgoing_invites=outgoing_invites)
 
 @main_bp.route('/accept-request/<int:request_id>/<int:group_id>', methods=['POST'])
 @login_required
@@ -103,6 +119,13 @@ def accept_request(request_id, group_id):
     GroupJoinRequest.approve(group_request)
     group.members.append(user)
     group.current_members += 1
+    db.session.commit()
+
+     # query pending group invites for user (if any) and delete
+    invites = GroupInvites.query.filter_by(invitee_id=user.id,
+                                            group_id=group.id,
+                                            status='pending'
+                                        ).delete()
     db.session.commit()
 
     flash(f"You have accepted {user.name}'s request to join {group.name}!", "info")
@@ -164,6 +187,7 @@ def find_groups():
     return render_template('find-groups.html', study_groups=filtered_groups, subjects=subjects)
 
 @main_bp.route('/search-groups')
+@login_required
 def search_groups():
     query = request.args.get('q', '').lower()
 
@@ -206,16 +230,12 @@ def edit_profile():
 
     updated_fields = []
 
-    print(f"To Update: {fields_to_update}")
-
     for field, new_value in fields_to_update.items():
         current_value = getattr(current_user, field)
         if new_value and new_value != current_value:
             setattr(current_user, field, new_value)
-            print(f"({current_user.name}):  {field}: {new_value}")
             updated_fields.append(field)
 
-    print(f"Updated: {updated_fields}")
 
     try:
         db.session.commit()
@@ -298,6 +318,13 @@ def join_group():
     except Exception as e:
         db.session.rollback()
         flash(f"An error occured: {str(e)}", "danger")
+
+    # query pending group invites for user (if any) and delete
+    invites = GroupInvites.query.filter_by(invitee_id=current_user.id,
+                                            group_id=group.id,
+                                            status='pending'
+                                        ).delete()
+    db.session.commit()
     
     return redirect(url_for('main.find_groups'))
 
@@ -519,6 +546,147 @@ def delete_group(group_id):
     flash(f"Study group '{group.name}' deleted successfully", "success")
     return redirect(url_for('main.my_groups'))
 
+@main_bp.route("/search/users", methods=['GET'])
+@login_required
+def search_users():
+    query = request.args.get('query', '').strip()
+    group_id = request.args.get('group_id')
+
+    if not query:
+        return jsonify([])
+    
+    # Get group
+    group = StudyGroup.query.get(group_id)
+
+    # Get all member ids in group
+    member_ids = {member.id for member in group.members}
+
+    # Find all users other than current user and members in group
+    users = User.query.filter(
+        ((User.name.ilike(f'%{query}%')) | (User.email.ilike(f'{query}%'))) &
+        ((User.id != current_user.id) & (~User.id.in_(member_ids)))
+    ).limit(10).all()
+
+    # Fetch invited users to group
+    invited_users = set(
+        invite.invitee_id for invite in GroupInvites.query.filter_by(group_id=group_id, status='pending')
+    )
+
+    results = [
+        {
+            'name': user.name,
+            'email': user.email,
+            'invited': user.id in invited_users
+        }
+        for user in users   
+    ]
+
+    return jsonify(results)
+    
+
+@main_bp.route('/invite/<int:group_id>', methods=['POST'])
+@login_required
+def send_invite(group_id):
+    data = request.get_json()
+    email = data.get('email')
+
+    if not email or not group_id:
+        return jsonify({'success': False, 'error': 'Email and Group ID are required'}), 400
+    
+    group = StudyGroup.query.filter_by(id=group_id, owner_id=current_user.id).first()
+    if not group:
+        return jsonify({'success': False, 'error': 'Group not found or unauthorized access'}), 403
+        
+    invitee = User.query.filter_by(email=email).first()
+    if not invitee:
+        return jsonify({'success': False, 'error': 'User not found'}), 403
+    if invitee == current_user.id:
+        return jsonify({'success': False, 'error': 'Cannot invite yourself'}), 405
+    if invitee in group.members:
+        return jsonify({'success': False, 'error': 'User is already a member of this group'}), 406
+    
+
+    existing_invite = GroupInvites.query.filter_by(
+        group_id=group_id, invitee_id=invitee.id, status='pending'
+    ).first()
+    if existing_invite:
+        return jsonify({'success': False, 'error': 'Invite already sent'}), 409
+    
+    new_invite = GroupInvites(
+        group_id=group_id,
+        inviter_id=current_user.id,
+        invitee_id=invitee.id
+    )
+    db.session.add(new_invite)
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': f'Invite sent to {invitee.email}'}), 200
 
 
+@main_bp.route('/accept-invite/<int:invite_id>', methods=['POST'])
+@login_required
+def accept_invite(invite_id):
+    try:
+        invite = validate_invite(invite_id, current_user.id, 'incoming')
+        group = StudyGroup.query.filter_by(id=invite.group_id).first()
+    
+        invite.status = 'accepted'
+        group.members.append(current_user)
+        group.current_members += 1
+        db.session.commit()
+        flash("Invite accepted!", "info")
+    except ValueError as e:
+        flash(str(e), "danger")
+        return redirect(url_for('main.inbox'))
+    except PermissionError as e:
+        flash(str(e), "danger")
+        return redirect(url_for('main.inbox'))
+    except Exception as e:
+        db.session.rollback()
+        flash(f"An error occured: {str(e)}", "danger")
+        return redirect(url_for("main.inbox"))
 
+    return redirect(url_for('main.inbox'))
+
+@main_bp.route('/reject-invite/<int:invite_id>', methods=['POST'])
+@login_required
+def reject_invite(invite_id):
+    try:
+        invite = validate_invite(invite_id, current_user.id, 'incoming')
+        invite.status = 'rejected'
+        db.session.commit()
+        flash("You have rejected this invite.", "info")
+    except ValueError as e:
+        flash(str(e), "danger")
+        return redirect(url_for('main.inbox'))
+    except PermissionError as e:
+        flash(str(e), "danger")
+        return redirect(url_for('main.inbox'))
+    except Exception as e:
+        db.session.rollback()
+        flash(f"An error occured: {str(e)}", "danger")
+        return redirect(url_for("main.inbox"))
+
+    return redirect(url_for('main.inbox'))
+
+@main_bp.route('/cancel-invite/<int:invite_id>', methods=['POST'])
+@login_required
+def cancel_invite(invite_id):
+    try:
+        invite = validate_invite(invite_id, current_user.id, 'outgoing')
+
+        db.session.delete(invite)
+        db.session.commit()
+        flash("You have canceled this invite.", "info")
+    except ValueError as e:
+        flash(str(e), "danger")
+        return redirect(url_for('main.inbox'))
+    except PermissionError as e:
+        flash(str(e), "danger")
+        return redirect(url_for('main.inbox'))
+    except Exception as e:
+        db.session.rollback()
+        flash(f"An error occured: {str(e)}", "danger")
+        return redirect(url_for("main.inbox"))
+
+    return redirect(url_for('main.inbox'))

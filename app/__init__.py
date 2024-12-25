@@ -9,6 +9,7 @@ from app.main import main_bp
 from app.models.user import User
 from app.models.study_group import StudyGroup
 from app.models.membership_requests import GroupJoinRequest
+from app.models.group_invites import GroupInvites
 
 load_dotenv()
 
@@ -20,6 +21,7 @@ def create_app():
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['PERMANENENT_SESSION_LIFETIME'] = timedelta(hours=1)
+    app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
     
     db_url = os.getenv('DATABASE_URL', 'sqlite:///StockStudy.db')
     if db_url.startswith("postgres://"):

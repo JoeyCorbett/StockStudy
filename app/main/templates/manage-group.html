@@ -48,7 +48,7 @@
         <div class="border-top pt-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold text-dark">Members</h5>
-                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#inviteMemberModal">Invite Members</button>
+                <button class="btn btn-primary btn-sm btn-group-id" data-bs-toggle="modal" data-bs-target="#inviteMemberModal" data-group-id="{{ group.id }}">Invite Members</button>
             </div>
             <ul class="list-group border rounded">
                 {% for member in members %}
@@ -87,29 +87,27 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Invite Member</h1>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Invite Members</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form>
-                    <div class="mb-3">
+                <div class="mb-3">
                     <label for="searchUser" class="form-label">Search Users</label>
                     <input 
                         type="text" 
                         id="searchUser" 
                         class="form-control" 
                         placeholder="Enter name or email"
+                        autofocus
                         oninput="searchUsers(this.value)">
                 </div>
                 <ul id="searchResults" class="list-group">
                     <!-- Dynamically Generated Users -->
                 </ul>
-                </form>
             </div>
         </div>
     </div>
 </div>
-
 
 <!-- Edit Group Form Modal -->
 <div class="modal fade" id="editGroupModal" tabindex="-1" aria-labelledby="editGroupModalLabel" aria-hidden="true">
