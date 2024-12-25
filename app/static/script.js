@@ -51,3 +51,68 @@ document.addEventListener('show.bs.modal', function (event) {
         modal.querySelector('.modal-location').textContent = groupLocation;
     }
 });
+
+
+function searchUsers(query) {
+    const inviteMemberModal = document.getElementById('inviteMemberModal');
+
+    inviteMemberModal.addEventListener('hidden.bs.modal', () => {
+        document.getElementById('searchUser').value = '';
+        document.getElementById('searchResults').innerHTML = '';
+    });
+
+    const resultsContainer = document.getElementById('searchResults');
+    button = document.querySelector('.btn-group-id')
+    groupID = button.getAttribute('data-group-id');
+
+    fetch(`/search/users?query=${query}&group_id=${groupID}`)
+        .then(response => response.json())
+        .then(users => {
+            if (users.length === 0) {
+                resultsContainer.innerHTML = `
+                    <li class="list-group-item text-center text-muted">
+                        No users found.
+                    </li>
+                `;
+                return;
+            }
+            resultsContainer.innerHTML = users.map(user => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">${user.name} (${user.email})</span>
+                    ${
+                        user.invited
+                            ? '<span class="badge bg-secondary py-2">Invited</span>'
+                            : `<button class="btn btn-primary btn-sm invite-btn" onclick="inviteUser('${user.email}', '${groupID}', this)">Invite</button>`
+                    }
+                </li>
+            `).join('');
+        })
+        .catch(error => console.error('Error fetching users:', error));
+}
+
+let isInviting = false;
+
+async function inviteUser(email, group_id, button) {
+    if (isInviting) return ;
+    isInviting = true;
+
+    try {
+        const response = await fetch(`/invite/${group_id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "An error occurred");
+        }
+
+        button.outerHTML = '<span class="badge bg-secondary py-2">Invited</span>';
+    } catch (error) {
+        console.error('Error inviting user:', error);
+    } finally {
+        isInviting = false;
+    }
+}
