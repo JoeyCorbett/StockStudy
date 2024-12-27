@@ -37,7 +37,7 @@
                 });
                 
                 map.addLayer({
-                    'id': 'my-tileset-layer',
+                    'id': 'stockton_layer',
                     'type': 'circle',
                     'source': 'stockton_data',
                     'source-layer': 'StockStudy',
@@ -46,6 +46,17 @@
                         'circle-radius': 6,
                         'circle-color': '#79BDE9',
                     }
+                });
+
+                map.on('click', 'stockton_layer', (e) => {
+                    const coordinates = e.features[0].geometry.coordinates.slice();
+                    const name = e.features[0].properties.name;
+                    const spaces = e.features[0].properties.spaces;
+
+                    new mapboxgl.Popup()
+                        .setLngLat(coordinates)
+                        .setHTML(`<h3>${name}</h3><p>${spaces}</p>`)
+                        .addTo(map);
                 });
             });
         </script>
