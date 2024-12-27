@@ -29,11 +29,11 @@
                 map.setConfigProperty('basemap', 'showRoadLabels', false);
                 map.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
                 map.setConfigProperty('basemap', 'showTransitLabels', false);
-                map.setConfigProperty('basemap', 'lightPreset', 'dusk');
+                map.setConfigProperty('basemap', 'lightPreset', 'day');
 
                 map.addSource('stockton_data', {
                     'type': 'vector',
-                    'url': 'mapbox://tylermong.cm51s1jh72g4v1up8msmajkpe-22trh'
+                    'url': 'mapbox://tylermong.cm51s1jh72g4v1up8msmajkpe-1s2gd'
                 });
                 
                 map.addLayer({
@@ -43,9 +43,8 @@
                     'source-layer': 'StockStudy',
                     'layout': {},
                     'paint': {
-                        'circle-color': '#7F3121',
-                        'circle-opacity': 0.75,
-                        'circle-radius': 5
+                        'circle-radius': 6,
+                        'circle-color': '#79BDE9',
                     }
                 });
             });
