@@ -25,73 +25,70 @@
         {% endwith %}
     </div>
 
-    <!-- Pending Requests -->
-    <div class="custom-container row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm border rounded">
-                <div class="card-body">
-                    <h3 class="fw-bold mb-3">Pending Requests (Your Groups)</h3>
-                    {% if group_requests %}
-                        <ul class="list-group list-group-flush">
-                            {% for request in group_requests %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>{{ request.user.name }}</strong> wants to join 
-                                        <strong>{{ request.group.name }}</strong>.
-                                        <br>
-                                        <small class="text-muted">Requested on {{ request.created_at.strftime('%B %d, %Y') }}</small>
-                                    </div>
-                                    <div class="d-flex gap-2">
-                                        <form method="POST" action="{{ url_for('main.accept_request', request_id=request.id, group_id=request.group_id) }}">
-                                            <button class="btn btn-success btn-sm">Approve</button>
-                                        </form>
-                                        <form method="POST" action="{{ url_for('main.reject_request', request_id=request.id, group_id=request.group_id) }}">
-                                            <button class="btn btn-danger btn-sm">Reject</button>
-                                        </form>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">No pending requests for your groups.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
+   <!-- Group Requests -->
+<div class="custom-container row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border rounded">
+            <div class="card-body">
+                <h3 class="fw-bold mb-3">Group Requests</h3>
 
-    <!-- Your Requests -->
-    <div class="custom-container row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm border rounded">
-                <div class="card-body">
-                    <h3 class="fw-bold mb-3">Your Requests</h3>
-                    {% if user_requests %}
-                        <ul class="list-group list-group-flush">
-                            {% for request in user_requests %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>{{ request.group.name }}</strong>
-                                        <br>
-                                        <small>Status: <span class="text-capitalize">{{ request.status }}</span></small>
-                                        <br>
-                                        <small class="text-muted">Requested on {{ request.created_at.strftime('%B %d, %Y') }}</small>
-                                    </div>
-                                    {% if request.status == 'pending' %}
-                                        <form method="POST" action="{{ url_for('main.cancel_request', request_id=request.id) }}">
-                                            <button class="btn btn-outline-secondary btn-sm">Cancel</button>
-                                        </form>
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">You haven't requested to join any groups.</p>
-                    {% endif %}
-                </div>
+                <!-- Pending Requests (Your Groups) -->
+                <h5 class="fw-bold mb-3">Pending Requests (Your Groups)</h5>
+                {% if group_requests %}
+                    <ul class="list-group list-group-flush">
+                        {% for request in group_requests %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ request.user.name }}</strong> wants to join 
+                                    <strong>{{ request.group.name }}</strong>.
+                                    <br>
+                                    <small class="text-muted">Requested on {{ request.created_at.strftime('%B %d, %Y') }}</small>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <form method="POST" action="{{ url_for('main.accept_request', request_id=request.id, group_id=request.group_id) }}">
+                                        <button class="btn btn-success btn-sm">Approve</button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('main.reject_request', request_id=request.id, group_id=request.group_id) }}">
+                                        <button class="btn btn-danger btn-sm">Reject</button>
+                                    </form>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No pending requests for your groups.</p>
+                {% endif %}
+
+                <hr class="my-4">
+
+                <!-- Your Requests -->
+                <h5 class="fw-bold mb-3">Your Requests</h5>
+                {% if user_requests %}
+                    <ul class="list-group list-group-flush">
+                        {% for request in user_requests %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ request.group.name }}</strong>
+                                    <br>
+                                    <small>Status: <span class="text-capitalize">{{ request.status }}</span></small>
+                                    <br>
+                                    <small class="text-muted">Requested on {{ request.created_at.strftime('%B %d, %Y') }}</small>
+                                </div>
+                                {% if request.status == 'pending' %}
+                                    <form method="POST" action="{{ url_for('main.cancel_request', request_id=request.id) }}">
+                                        <button class="btn btn-outline-secondary btn-sm">Cancel</button>
+                                    </form>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">You haven't requested to join any groups.</p>
+                {% endif %}
             </div>
         </div>
     </div>
+</div>
 
     <!-- Group Invites -->
 <div class="custom-container row mb-4">
