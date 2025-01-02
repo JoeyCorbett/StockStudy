@@ -42,11 +42,21 @@
                     'type': 'circle',
                     'source': 'stockton_data',
                     'source-layer': 'StockStudy',
-                    'layout': {},
+                    'layout': {
+                        'cursor': 'pointer'
+                    },
                     'paint': {
                         'circle-radius': 6,
                         'circle-color': '#79BDE9',
                     }
+                });
+
+                map.on('mouseenter', 'stockton_layer', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+
+                map.on('mouseleave', 'stockton_layer', () => {
+                    map.getCanvas().style.cursor = '';
                 });
 
                 map.on('click', 'stockton_layer', (e) => {
