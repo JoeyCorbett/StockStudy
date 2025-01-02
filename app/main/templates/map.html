@@ -1,53 +1,84 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Map - StockStudy</title>
+        <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+        <link href="https://api.mapbox.com/mapbox-gl-js/v3.9.1/mapbox-gl.css" rel="stylesheet">
+        <script src="https://api.mapbox.com/mapbox-gl-js/v3.9.1/mapbox-gl.js"></script>
+        
+        <style>
+            body { margin: 0; padding: 0; }
+            #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        </style>
+    </head>
 
-{% block title %}
-    Map - StockStudy
-{% endblock %}
+    <body>
+        <div id="map"></div>
+        <script>
+            // Reads the access key from the environment variables
+            mapboxgl.accessToken = '{{ ACCESS_KEY }}';
 
-{% block content %}
-<div class="container-fluid p-0">
-    <div class="card shadow-sm rounded">
-        <div class="card-header d-flex justify-content-between align-items-center bg-light">
-            <h5 class="mb-0 fw-bold">Map of Study Spots</h5>
-            <button class="btn btn-outline-primary btn-sm" disabled>Coming Soon</button>
-        </div>
-        <div class="card-body p-0 text-center" style="height: calc(100vh - 320px);">
-            <div class="alert alert-info mt-3">
-                <h5>Explore Study Spots - Coming Soon!</h5>
-            </div>
-            <script>
-                fetch('/map-data')
-                    .then(response => response.text())
-                    .then(script => eval(script));
-            </script>
-            <gmp-map 
-                center="39.49237060546875,-74.53160095214844" 
-                zoom="17" 
-                map-id="YOUR_MAP_ID" 
-                style="height: 90%; width: 100%; display: block;">
-                <gmp-advanced-marker 
-                    position="39.49237060546875,-74.53160095214844" 
-                    title="Stockton University">
-                </gmp-advanced-marker>
-            </gmp-map>
-        </div>
-        <div class="card-footer text-muted text-center">
-            Map powered by <a href="https://maps.google.com" target="_blank" class="text-decoration-none">Google Maps</a>
-        </div>
-    </div>
-</div>
+            // Creates the map with preconfigured settings
+            const map = new mapboxgl.Map({
+                container: 'map',
+                center: [-74.531132, 39.492082],
+                zoom: 17.5,
+                pitch: 30,
+                lightPreset: 'dusk',
+            });
 
-<style>
-    gmp-map {
-        display: block;
-        height: 500px;
-        width: 100%;
-    }
+            map.on('style.load', () => {
+                // Configures the map to show only the necessary labels
+                map.setConfigProperty('basemap', 'showPlaceLabels', false);
+                map.setConfigProperty('basemap', 'showRoadLabels', false);
+                map.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
+                map.setConfigProperty('basemap', 'showTransitLabels', false);
+                map.setConfigProperty('basemap', 'lightPreset', 'day');
 
-    body {
-        margin: 0;
-        padding: 0;
-        background-color: #f8f9fa; /* Light gray background for contrast */
-    }
-</style>
-{% endblock %}
+                // Reads the data from the vector tileset
+                map.addSource('stockton_data', {
+                    'type': 'vector',
+                    'url': 'mapbox://tylermong.cm51s1jh72g4v1up8msmajkpe-55o6r'
+                });
+                
+                // Writes the vector tileset data to the map
+                map.addLayer({
+                    'id': 'stockton_layer',
+                    'type': 'circle',
+                    'source': 'stockton_data',
+                    'source-layer': 'StockStudy',
+                    'layout': {
+                        'cursor': 'pointer'
+                    },
+                    'paint': {
+                        'circle-radius': 6,
+                        'circle-color': '#79BDE9',
+                    }
+                });
+
+                // Changes the cursor to a pointer when hovering over the layer
+                map.on('mouseenter', 'stockton_layer', () => {
+                    map.getCanvas().style.cursor = 'pointer';
+                })
+
+                // Changes the cursor back to the default when not hovering over the layer
+                map.on('mouseleave', 'stockton_layer', () => {
+                    map.getCanvas().style.cursor = '';
+                });
+
+                // Displays the information of the selected space in a popup
+                map.on('click', 'stockton_layer', (e) => {
+                    const coordinates = e.features[0].geometry.coordinates.slice();
+                    const name = e.features[0].properties.name;
+                    const spaces = e.features[0].properties.spaces;
+
+                    new mapboxgl.Popup()
+                        .setLngLat(coordinates)
+                        .setHTML(`<h3>${name}</h3><p>${spaces}</p>`)
+                        .addTo(map);
+                });
+            });
+        </script>
+    </body>
+</html>
