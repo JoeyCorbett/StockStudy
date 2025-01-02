@@ -12,19 +12,11 @@ from sqlalchemy import or_
 from sqlalchemy.orm import aliased
 from app.utils import is_valid_password
 
-GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY')
 MAPBOX_ACCESS_KEY = os.getenv('MAPBOX_ACCESS_KEY')
 
 @main_bp.route('/')
 def landing():
     return render_template('landing.html')
-
-@main_bp.route('/map-data')
-def map_data():
-    response = requests.get(
-         f"https://maps.googleapis.com/maps/api/js?key={GOOGLE_MAPS_API_KEY}&libraries=maps,marker&v=beta"
-    )
-    return response.text
 
 @main_bp.route('/my-groups')
 @login_required
